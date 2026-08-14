@@ -63,7 +63,7 @@ function LoginPage({ onLogin }) {
               placeholder="Ej. admin"
               variant="bordered"
               value={username}
-              onValueChange={setUsername}
+              onChange={(e) => setUsername(e.target.value)}
             />
             
             <Input
@@ -73,7 +73,7 @@ function LoginPage({ onLogin }) {
               placeholder="********"
               variant="bordered"
               value={password}
-              onValueChange={setPassword}
+              onChange={(e) => setPassword(e.target.value)}
             />
 
             <Button 
