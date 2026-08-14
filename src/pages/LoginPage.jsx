@@ -56,23 +56,23 @@ function LoginPage({ onLogin }) {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
-              isRequired
-              label="Usuario"
-              placeholder="Ej. admin"
-              variant="bordered"
-              value={username}
-              onValueChange={setUsername}
-            />
+  isRequired
+  label="Usuario"
+  placeholder="Ej. admin"
+  variant="bordered"
+  value={username}
+  onChange={(e) => setUsername(e.target.value)}
+/>
 
-            <Input
-              isRequired
-              type="password"
-              label="Contraseña"
-              placeholder="********"
-              variant="bordered"
-              value={password}
-              onValueChange={setPassword}
-            />
+<Input
+  isRequired
+  type="password"
+  label="Contraseña"
+  placeholder="********"
+  variant="bordered"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+/>
 
             <Button
               type="submit"
