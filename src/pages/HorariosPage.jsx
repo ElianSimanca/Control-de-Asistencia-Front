@@ -73,14 +73,20 @@ export default function HorariosPage() {
     }
   };
 
-  const eliminarHorario = async (id) => {
+ const eliminarHorario = async (id) => {
     if (!window.confirm("¿Estás seguro de eliminar este horario?")) return;
     
     try {
       await api.delete(`/horarios/${id}`);
-      cargarHorarios();
+      cargarHorarios(); // Si tiene éxito, recarga la tabla
     } catch (err) {
-      console.error("Error al eliminar el horario:", err);
+      // Verificamos si el error viene del backend y es el código 409
+      if (err.response && err.response.status === 409) {
+        alert(err.response.data); // Mostrará: "No se puede eliminar el horario..."
+      } else {
+        console.error("Error al eliminar el horario:", err);
+        alert("Ocurrió un error inesperado al intentar eliminar el horario.");
+      }
     }
   };
 
