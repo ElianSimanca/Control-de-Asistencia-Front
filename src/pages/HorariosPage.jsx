@@ -128,8 +128,8 @@ export default function HorariosPage() {
         <Table.ScrollContainer>
           <Table.Content aria-label="Tabla de horarios">
             <Table.Header>
-              <Table.Column isRowHeader>ID</Table.Column>
-              <Table.Column>NOMBRE TURNO</Table.Column>
+             
+              <Table.Column isRowHeader>NOMBRE TURNO</Table.Column>
               <Table.Column>HORA ENTRADA</Table.Column>
               <Table.Column>HORA SALIDA</Table.Column>
               <Table.Column>TOLERANCIA</Table.Column>
@@ -146,7 +146,7 @@ export default function HorariosPage() {
             >
               {(horario) => (
                 <Table.Row id={horario.id}>
-                  <Table.Cell>{horario.id}</Table.Cell>
+                  
                   <Table.Cell className="font-semibold">
                     {horario.nombre}
                   </Table.Cell>

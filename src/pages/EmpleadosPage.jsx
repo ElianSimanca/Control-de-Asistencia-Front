@@ -161,106 +161,104 @@ export default function EmpleadosPage() {
       </div>
 
       <Table>
-        <Table.ScrollContainer>
-          <Table.Content aria-label="Tabla de empleados">
-            <Table.Header>
-              <Table.Column isRowHeader><span>ID</span></Table.Column>
-              <Table.Column><span>NOMBRE</span></Table.Column>
-              <Table.Column><span>DOCUMENTO</span></Table.Column>
-              <Table.Column><span>CARGO</span></Table.Column>
-              <Table.Column><span>HORARIO</span></Table.Column>
-              <Table.Column><span>ESTADO</span></Table.Column>
-              <Table.Column><span>ACCIONES</span></Table.Column>
-            </Table.Header>
+  <Table.ScrollContainer>
+    <Table.Content aria-label="Tabla de empleados">
+      <Table.Header>
+        <Table.Column><span>NOMBRE</span></Table.Column>
+        <Table.Column><span>DOCUMENTO</span></Table.Column>
+        <Table.Column><span>CARGO</span></Table.Column>
+        <Table.Column><span>HORARIO</span></Table.Column>
+        <Table.Column><span>ESTADO</span></Table.Column>
+        <Table.Column><span>ACCIONES</span></Table.Column>
+      </Table.Header>
 
-            <Table.Body
-              items={empleados}
-              renderEmptyState={() =>
-                loading
-                  ? "Cargando empleados..."
-                  : "No hay empleados registrados."
-              }
-            >
-              {(emp) => (
-                <Table.Row id={String(emp.id)}>
-                  <Table.Cell>
-                    <span>{emp.id}</span>
-                  </Table.Cell>
+      <Table.Body
+        items={empleados}
+        renderEmptyState={() =>
+          loading
+            ? "Cargando empleados..."
+            : "No hay empleados registrados."
+        }
+      >
+        {(emp) => (
+          <Table.Row id={String(emp.id)}>
 
-                  <Table.Cell>
-                    <span>{emp.nombre}</span>
-                  </Table.Cell>
+            <Table.Cell>
+              <span>{emp.nombre}</span>
+            </Table.Cell>
 
-                  <Table.Cell>
-                    <span>{emp.documento}</span>
-                  </Table.Cell>
+            <Table.Cell>
+              <span>{emp.documento}</span>
+            </Table.Cell>
 
-                  <Table.Cell>
-                    <span>{emp.cargo}</span>
-                  </Table.Cell>
+            <Table.Cell>
+              <span>{emp.cargo}</span>
+            </Table.Cell>
 
-                  <Table.Cell>
-                    {emp.horario ? (
-                      <Chip color="primary" size="sm">
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          <span>{emp.horario.nombre}</span>
-                        </span>
-                      </Chip>
-                    ) : (
-                      <span className="text-gray-400 text-sm">
-                        Sin asignar
-                      </span>
-                    )}
-                  </Table.Cell>
-
-                  <Table.Cell>
-                    <Chip
-                      color={emp.activo ? "success" : "danger"}
-                      size="sm"
-                    >
-                      {/* Convertimos el Fragmento vacío (<>) en un div real */}
-                      <div className="flex items-center gap-1">
-                        {emp.activo ? (
-                          <>
-                            <UserCheck size={14} />
-                            <span>Activo</span>
-                          </>
-                        ) : (
-                          <>
-                            <UserX size={14} />
-                            <span>Inactivo</span>
-                          </>
-                        )}
-                      </div>
-                    </Chip>
-                  </Table.Cell>
-
-                  <Table.Cell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onPress={() => abrirEditar(emp)}
-                      >
-                        <span>Editar</span>
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        color={emp.activo ? "danger" : "success"}
-                        onPress={() => cambiarEstado(emp.id)}
-                      >
-                        <span>{emp.activo ? "Desactivar" : "Activar"}</span>
-                      </Button>
-                    </div>
-                  </Table.Cell>
-                </Table.Row>
+            <Table.Cell>
+              {emp.horario ? (
+                <Chip color="primary" size="sm">
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} />
+                    <span>{emp.horario.nombre}</span>
+                  </span>
+                </Chip>
+              ) : (
+                <span className="text-gray-400 text-sm">
+                  Sin asignar
+                </span>
               )}
-            </Table.Body>
-          </Table.Content>
-        </Table.ScrollContainer>
-      </Table>
+            </Table.Cell>
+
+            <Table.Cell>
+              <Chip
+                color={emp.activo ? "success" : "danger"}
+                size="sm"
+              >
+                <div className="flex items-center gap-1">
+                  {emp.activo ? (
+                    <>
+                      <UserCheck size={14} />
+                      <span>Activo</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserX size={14} />
+                      <span>Inactivo</span>
+                    </>
+                  )}
+                </div>
+              </Chip>
+            </Table.Cell>
+
+            <Table.Cell>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => abrirEditar(emp)}
+                >
+                  <span>Editar</span>
+                </Button>
+
+                <Button
+                  size="sm"
+                  color={emp.activo ? "danger" : "success"}
+                  onPress={() => cambiarEstado(emp.id)}
+                >
+                  <span>
+                    {emp.activo ? "Desactivar" : "Activar"}
+                  </span>
+                </Button>
+              </div>
+            </Table.Cell>
+
+          </Table.Row>
+        )}
+      </Table.Body>
+    </Table.Content>
+  </Table.ScrollContainer>
+</Table>
 
       <Modal state={modalState}>
         <Modal.Backdrop>

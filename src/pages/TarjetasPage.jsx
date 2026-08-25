@@ -240,11 +240,8 @@ export default function TarjetasPage() {
 
             <Table.Header>
 
-              <Table.Column isRowHeader>
-                ID
-              </Table.Column>
 
-              <Table.Column>
+              <Table.Column isRowHeader>
                 UID
               </Table.Column>
 
@@ -278,10 +275,6 @@ export default function TarjetasPage() {
               {(tarjeta) => (
 
                 <Table.Row id={tarjeta.id}>
-
-                  <Table.Cell>
-                    {tarjeta.id}
-                  </Table.Cell>
 
                   <Table.Cell>
 
