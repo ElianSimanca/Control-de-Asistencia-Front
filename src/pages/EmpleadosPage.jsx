@@ -164,7 +164,7 @@ export default function EmpleadosPage() {
   <Table.ScrollContainer>
     <Table.Content aria-label="Tabla de empleados">
       <Table.Header>
-        <Table.Column><span>NOMBRE</span></Table.Column>
+        <Table.Column isRowHeader><span>NOMBRE</span></Table.Column>
         <Table.Column><span>DOCUMENTO</span></Table.Column>
         <Table.Column><span>CARGO</span></Table.Column>
         <Table.Column><span>HORARIO</span></Table.Column>
