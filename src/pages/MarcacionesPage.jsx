@@ -91,11 +91,8 @@ export default function MarcacionesPage() {
 
             <Table.Header>
 
-              <Table.Column isRowHeader>
-                ID
-              </Table.Column>
 
-              <Table.Column>
+              <Table.Column isRowHeader>
                 EMPLEADO
               </Table.Column>
 
@@ -138,10 +135,6 @@ export default function MarcacionesPage() {
                 return (
 
                   <Table.Row id={marcacion.id}>
-
-                    <Table.Cell>
-                      {marcacion.id}
-                    </Table.Cell>
 
                     <Table.Cell>
                       {marcacion.empleado?.nombre ||

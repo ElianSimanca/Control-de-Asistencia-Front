@@ -6,6 +6,7 @@ import EmpleadosPage from "./pages/EmpleadosPage";
 import TarjetasPage from "./pages/TarjetasPage";
 import MarcacionesPage from "./pages/MarcacionesPage";
 import HorariosPage from "./pages/HorariosPage";
+import InicioPage from "./pages/InicioPage";
 
 // 1. Importamos el nuevo componente de Login que vamos a crear
 import LoginPage from "./pages/LoginPage"; 
