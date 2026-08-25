@@ -299,14 +299,22 @@ export default function EmpleadosPage() {
                       />
                     </TextField>
 
-                    <TextField isRequired>
-                      <Label>Cargo</Label>
-                      <Input
-                        placeholder="Ej. Administrador"
-                        value={cargo}
-                        onChange={(e) => setCargo(e.target.value)}
-                      />
-                    </TextField>
+                    <div>
+  <label className="block text-sm font-medium mb-1">
+    Cargo <span className="text-red-500">*</span>
+  </label>
+  <select
+    required
+    value={cargo}
+    onChange={(e) => setCargo(e.target.value)}
+    className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white"
+  >
+    <option value="" disabled>Seleccionar cargo</option>
+    <option value="Empleado">Empleado</option>
+    <option value="Administrador">Administrador</option>
+    <option value="Directivo">Directivo</option>
+  </select>
+</div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1">
