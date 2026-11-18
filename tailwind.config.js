@@ -1,20 +1,24 @@
 /** @type {import('tailwindcss').Config} */
+import { heroui } from "@heroui/react";
+
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}", // IMPORTANTE PARA HEROUI
   ],
   theme: {
     extend: {
       colors: {
         brand: {
-          blue: '#1A365D',   // Azul marino del logo
-          green: '#15803D',  // Verde del logo
-          yellow: '#CA8A04', // Amarillo del logo
-          red: '#B91C1C',    // Rojo del logo
+          blue: '#1A365D',
+          green: '#15803D',
+          yellow: '#CA8A04',
+          red: '#B91C1C',
         }
       },
     },
   },
-  plugins: [],
+  darkMode: "class",
+  plugins: [heroui()], // AQUÍ SE ACTIVA HEROUI
 }
