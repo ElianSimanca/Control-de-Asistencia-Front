@@ -1,10 +1,11 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
   CreditCard,
   ClipboardCheck,
   Clock,
+  LogOut,
 } from "lucide-react";
 
 const menu = [
@@ -16,6 +17,19 @@ const menu = [
 ];
 
 export default function Layout() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // 1. Borramos el token del localStorage
+    localStorage.removeItem("token");
+    
+    // 2. Redirigimos al usuario a la raíz (donde está el Login)
+    navigate("/");
+    
+    // 3. Recargamos la página para que App.jsx vuelva a evaluar si hay sesión
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* BARRA LATERAL CON EFECTO CRISTAL */}
@@ -39,7 +53,7 @@ export default function Layout() {
         </div>
 
         {/* MENÚ DE NAVEGACIÓN */}
-        <nav className="p-5 flex flex-col gap-2 flex-1 mt-4">
+        <nav className="p-5 flex flex-col gap-2 flex-1 mt-4 overflow-y-auto">
           <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
             Módulos
           </p>
@@ -62,6 +76,17 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
+        {/* BOTÓN DE CERRAR SESIÓN */}
+        <div className="p-5 border-t border-white/5">
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-white/5 text-gray-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 border border-transparent transition-all duration-300"
+          >
+            <LogOut size={20} />
+            <span className="font-medium">Cerrar Sesión</span>
+          </button>
+        </div>
       </aside>
 
       {/* CONTENIDO PRINCIPAL */}
