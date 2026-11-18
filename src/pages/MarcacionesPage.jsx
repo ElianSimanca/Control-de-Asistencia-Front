@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Button, Chip, addToast } from "@heroui/react";
+import { Button, Chip, toast } from "@heroui/react"; // <-- CORREGIDO
 import { RefreshCw, Loader2 } from "lucide-react";
 
 export default function MarcacionesPage() {
@@ -13,11 +13,7 @@ export default function MarcacionesPage() {
       setMarcaciones(response.data);
     } catch (err) {
       console.error("Error al obtener marcaciones:", err);
-      addToast({
-        title: "Error de conexión",
-        description: "No se pudieron cargar las marcaciones.",
-        color: "danger",
-      });
+      toast.danger("Error de conexión", { description: "No se pudieron cargar las marcaciones." });
     } finally {
       setLoading(false);
     }
@@ -40,11 +36,7 @@ export default function MarcacionesPage() {
 
   const handleSincronizar = () => {
     cargarMarcaciones();
-    addToast({
-      title: "Sincronizando",
-      description: "Consultando los datos más recientes...",
-      color: "default",
-    });
+    toast.default("Sincronizando", { description: "Consultando los datos más recientes..." });
   };
 
   return (
@@ -55,11 +47,7 @@ export default function MarcacionesPage() {
           <p className="text-gray-400 mt-2 text-lg">Entradas y salidas en tiempo real</p>
           <p className="mt-3 text-lg font-semibold capitalize text-brand-green">{diaHoy}, {fechaHoy}</p>
         </div>
-        
-        <Button 
-          className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 backdrop-blur-md" 
-          onPress={handleSincronizar}
-        >
+        <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 backdrop-blur-md" onPress={handleSincronizar}>
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           Sincronizar
         </Button>
@@ -78,8 +66,6 @@ export default function MarcacionesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              
-              {/* MENSAJE DE CARGA MEJORADO */}
               {marcacionesHoy.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-12 text-center">
@@ -95,7 +81,6 @@ export default function MarcacionesPage() {
                   </td>
                 </tr>
               )}
-
               {marcacionesHoy.map((m) => {
                 const fecha = new Date(m.fechaHora);
                 return (
@@ -104,16 +89,10 @@ export default function MarcacionesPage() {
                     <td className="p-4 text-gray-400 font-mono">{m.empleado?.documento || "-"}</td>
                     <td className="p-4 text-gray-300 font-mono">{fecha.toLocaleTimeString("es-CO")}</td>
                     <td className="p-4">
-                      <Chip size="sm" variant="flat" className={m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}>
-                        {m.tipo}
-                      </Chip>
+                      <Chip size="sm" variant="flat" className={m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}>{m.tipo}</Chip>
                     </td>
                     <td className="p-4">
-                      {m.minutosRetraso > 0 ? (
-                        <span className="text-sm font-medium text-red-400">{m.minutosRetraso} min tarde</span>
-                      ) : (
-                        <span className="text-sm font-medium text-green-400">A tiempo</span>
-                      )}
+                      {m.minutosRetraso > 0 ? <span className="text-sm font-medium text-red-400">{m.minutosRetraso} min tarde</span> : <span className="text-sm font-medium text-green-400">A tiempo</span>}
                     </td>
                   </tr>
                 );
