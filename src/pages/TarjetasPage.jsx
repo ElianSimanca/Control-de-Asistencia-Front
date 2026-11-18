@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
-  Table,
   Button,
   Label,
   Modal,
@@ -19,9 +18,6 @@ export default function TarjetasPage() {
   const [empleadoId, setEmpleadoId] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // =========================================================
-  // CARGAR DATOS
-  // =========================================================
   const cargarDatos = async () => {
     try {
       const [tarjetasResponse, empleadosResponse] = await Promise.all([
@@ -41,18 +37,12 @@ export default function TarjetasPage() {
     cargarDatos();
   }, []);
 
-  // =========================================================
-  // ABRIR ASIGNACIÓN
-  // =========================================================
   const abrirAsignacion = (tarjeta) => {
     setTarjetaSeleccionada(tarjeta);
     setEmpleadoId("");
     setIsOpen(true);
   };
 
-  // =========================================================
-  // ASIGNAR TARJETA
-  // =========================================================
   const asignarTarjeta = async (e) => {
     e.preventDefault();
     if (!tarjetaSeleccionada || !empleadoId) {
@@ -78,9 +68,6 @@ export default function TarjetasPage() {
     }
   };
 
-  // =========================================================
-  // DESASIGNAR
-  // =========================================================
   const desasignarTarjeta = async (tarjeta) => {
     const confirmar = window.confirm(`¿Desasignar la tarjeta ${tarjeta.uid}?`);
     if (!confirmar) return;
@@ -94,9 +81,6 @@ export default function TarjetasPage() {
     }
   };
 
-  // =========================================================
-  // CAMBIAR ESTADO
-  // =========================================================
   const cambiarEstado = async (tarjeta) => {
     try {
       const endpoint = tarjeta.activa
@@ -110,9 +94,6 @@ export default function TarjetasPage() {
     }
   };
 
-  // =========================================================
-  // ELIMINAR
-  // =========================================================
   const eliminarTarjeta = async (tarjeta) => {
     const confirmar = window.confirm(`¿Eliminar la tarjeta ${tarjeta.uid}?`);
     if (!confirmar) return;
@@ -126,7 +107,6 @@ export default function TarjetasPage() {
     }
   };
 
-  // Filtro de búsqueda
   const tarjetasFiltradas = tarjetas.filter(
     (t) =>
       t.uid?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -162,46 +142,45 @@ export default function TarjetasPage() {
         </div>
       </div>
 
-      {/* TABLA */}
-      <div className="glass-panel p-2 overflow-hidden">
-        <Table 
-          classNames={{
-            wrapper: "bg-transparent shadow-none p-0",
-            table: "bg-transparent",
-            thead: "bg-transparent",
-            th: "bg-transparent text-gray-400 font-semibold border-b border-white/10 pb-4",
-            tbody: "bg-transparent",
-            tr: "border-b border-white/5 hover:bg-white/5 transition-colors cursor-default",
-            td: "text-white py-4",
-          }}
-        >
-          <Table.ScrollContainer>
-            <Table.Content aria-label="Tabla de tarjetas">
-              
-              <Table.Header>
-                <Table.Column isRowHeader>UID TARJETA</Table.Column>
-                <Table.Column>EMPLEADO</Table.Column>
-                <Table.Column>DOCUMENTO</Table.Column>
-                <Table.Column>ESTADO</Table.Column>
-                <Table.Column>ACCIONES</Table.Column>
-              </Table.Header>
-
-              <Table.Body
-                items={tarjetasFiltradas}
-                renderEmptyState={() =>
-                  loading ? "Cargando tarjetas..." : "No hay tarjetas registradas."
-                }
-              >
-                {(tarjeta) => (
-                  <Table.Row key={tarjeta.id}>
+      {/* TABLA NATIVA (SIN HEROUI) */}
+      <div className="glass-panel overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">UID Tarjeta</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Empleado</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Documento</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-400">
+                    Cargando tarjetas...
+                  </td>
+                </tr>
+              ) : tarjetasFiltradas.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-400">
+                    No hay tarjetas registradas.
+                  </td>
+                </tr>
+              ) : (
+                tarjetasFiltradas.map((tarjeta) => (
+                  <tr key={tarjeta.id} className="hover:bg-white/5 transition-colors group">
                     
-                    <Table.Cell>
+                    {/* UID */}
+                    <td className="p-4">
                       <span className="font-mono text-white font-medium tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">
                         {tarjeta.uid}
                       </span>
-                    </Table.Cell>
+                    </td>
 
-                    <Table.Cell>
+                    {/* EMPLEADO */}
+                    <td className="p-4">
                       {tarjeta.empleado?.nombre ? (
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-brand-blue/20 flex items-center justify-center text-blue-300 font-bold border border-brand-blue/30 text-xs">
@@ -214,15 +193,17 @@ export default function TarjetasPage() {
                           <Unlink size={14} /> Sin asignar
                         </span>
                       )}
-                    </Table.Cell>
+                    </td>
 
-                    <Table.Cell>
+                    {/* DOCUMENTO */}
+                    <td className="p-4">
                       <span className="text-gray-400 font-mono">
                         {tarjeta.empleado?.documento || "-"}
                       </span>
-                    </Table.Cell>
+                    </td>
 
-                    <Table.Cell>
+                    {/* ESTADO */}
+                    <td className="p-4">
                       <Chip
                         size="sm"
                         variant="flat"
@@ -234,9 +215,10 @@ export default function TarjetasPage() {
                       >
                         {tarjeta.activa ? "Activa" : "Inactiva"}
                       </Chip>
-                    </Table.Cell>
+                    </td>
 
-                    <Table.Cell>
+                    {/* ACCIONES */}
+                    <td className="p-4">
                       <div className="flex gap-2 flex-wrap">
                         {!tarjeta.empleado && (
                           <Button
@@ -279,17 +261,16 @@ export default function TarjetasPage() {
                           <Trash2 size={14} />
                         </Button>
                       </div>
-                    </Table.Cell>
-
-                  </Table.Row>
-                )}
-              </Table.Body>
-            </Table.Content>
-          </Table.ScrollContainer>
-        </Table>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* MODAL ASIGNACIÓN (Se mantiene igual) */}
+      {/* MODAL ASIGNACIÓN */}
       <Modal>
         <Modal.Backdrop
           isOpen={isOpen}
