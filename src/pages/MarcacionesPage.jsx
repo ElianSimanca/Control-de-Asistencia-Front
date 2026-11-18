@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip, addToast } from "@heroui/react";
 import { RefreshCw } from "lucide-react";
 
 export default function MarcacionesPage() {
@@ -13,6 +13,11 @@ export default function MarcacionesPage() {
       setMarcaciones(response.data);
     } catch (err) {
       console.error("Error al obtener marcaciones:", err);
+      addToast({
+        title: "Error de conexión",
+        description: "No se pudieron cargar las marcaciones.",
+        color: "danger",
+      });
     } finally {
       setLoading(false);
     }
@@ -33,6 +38,15 @@ export default function MarcacionesPage() {
     return fecha.getFullYear() === hoy.getFullYear() && fecha.getMonth() === hoy.getMonth() && fecha.getDate() === hoy.getDate();
   });
 
+  const handleSincronizar = () => {
+    cargarMarcaciones();
+    addToast({
+      title: "Datos actualizados",
+      description: "La tabla de marcaciones está al día.",
+      color: "success",
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -41,7 +55,11 @@ export default function MarcacionesPage() {
           <p className="text-gray-400 mt-2 text-lg">Entradas y salidas en tiempo real</p>
           <p className="mt-3 text-lg font-semibold capitalize text-brand-green">{diaHoy}, {fechaHoy}</p>
         </div>
-        <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 backdrop-blur-md" onPress={cargarMarcaciones}>
+        
+        <Button 
+          className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 backdrop-blur-md" 
+          onPress={handleSincronizar}
+        >
           <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           Sincronizar
         </Button>
@@ -60,6 +78,13 @@ export default function MarcacionesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
+              {marcacionesHoy.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-400">
+                    {loading ? "Cargando marcaciones..." : "No hay marcaciones hoy."}
+                  </td>
+                </tr>
+              )}
               {marcacionesHoy.map((m) => {
                 const fecha = new Date(m.fechaHora);
                 return (
