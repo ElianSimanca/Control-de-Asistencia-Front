@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Toast } from "@heroui/react"; // <-- CAMBIO AQUÍ
+import { Toast } from "@heroui/react"; // <-- IMPORTANTE
 import Layout from "./components/Layout";
 
 import EmpleadosPage from "./pages/EmpleadosPage";
@@ -24,11 +24,27 @@ function App() {
 
   if (checkingAuth) return null;
 
-  // El Toast.Provider se coloca una sola vez, envolviendo todo
   return (
-    <Toast.Provider placement="top-right" />
-    // ^^^ ESTO ES LO QUE CAMBIA
-    // El resto del código sigue igual, pero sin el ToastProvider viejo.
+    <>
+      <Toast.Provider placement="top-right" />
+      {!isAuthenticated ? (
+        <Routes>
+          <Route path="/login" element={<LoginPage onLogin={() => setIsAuthenticated(true)} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      ) : (
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<InicioPage />} />
+            <Route path="/empleados" element={<EmpleadosPage />} />
+            <Route path="/tarjetas" element={<TarjetasPage />} />
+            <Route path="/marcaciones" element={<MarcacionesPage />} />
+            <Route path="/horarios" element={<HorariosPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      )}
+    </>
   );
 }
 
