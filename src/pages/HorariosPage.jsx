@@ -7,7 +7,7 @@ import {
   Label,
   Modal,
   Chip,
-  addToast, // IMPORTAMOS EL TOAST
+  toast, // <-- CORREGIDO
 } from "@heroui/react";
 import { Plus, RefreshCw, Clock, Trash2 } from "lucide-react";
 
@@ -16,13 +16,7 @@ export default function HorariosPage() {
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
-  const [formData, setFormData] = useState({
-    nombre: "",
-    horaEntrada: "08:00",
-    horaSalida: "17:00",
-    toleranciaMinutos: 15,
-  });
+  const [formData, setFormData] = useState({ nombre: "", horaEntrada: "08:00", horaSalida: "17:00", toleranciaMinutos: 15 });
 
   const cargarHorarios = async () => {
     try {
@@ -42,10 +36,7 @@ export default function HorariosPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "toleranciaMinutos" ? Number(value) : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: name === "toleranciaMinutos" ? Number(value) : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -56,18 +47,10 @@ export default function HorariosPage() {
       cargarHorarios();
       setIsOpen(false);
       setFormData({ nombre: "", horaEntrada: "08:00", horaSalida: "17:00", toleranciaMinutos: 15 });
-      addToast({
-        title: "Horario creado",
-        description: "El turno se guardó correctamente.",
-        color: "success",
-      });
+      toast.success("Horario creado", { description: "El turno se guardó correctamente." });
     } catch (err) {
       console.error("Error al crear el horario:", err);
-      addToast({
-        title: "Error",
-        description: "No se pudo guardar el horario.",
-        color: "danger",
-      });
+      toast.danger("Error", { description: "No se pudo guardar el horario." });
     } finally {
       setGuardando(false);
     }
@@ -78,53 +61,32 @@ export default function HorariosPage() {
     try {
       await api.delete(`/horarios/${id}`);
       cargarHorarios();
-      addToast({
-        title: "Horario eliminado",
-        description: "El turno se borró del sistema.",
-        color: "success",
-      });
+      toast.success("Horario eliminado", { description: "El turno se borró del sistema." });
     } catch (err) {
       if (err.response && err.response.status === 409) {
-        addToast({
-          title: "No se puede eliminar",
-          description: err.response.data, // Muestra el mensaje del backend
-          color: "warning",
-        });
+        toast.warning("No se puede eliminar", { description: err.response.data });
       } else {
         console.error("Error al eliminar el horario:", err);
-        addToast({
-          title: "Error",
-          description: "Ocurrió un error inesperado al eliminar.",
-          color: "danger",
-        });
+        toast.danger("Error", { description: "Ocurrió un error inesperado al eliminar." });
       }
     }
   };
 
   const formatearHora = (horaString) => {
     if (!horaString) return "-";
-    return horaString.substring(0, 5); 
+    return horaString.substring(0, 5);
   };
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Clock className="w-8 h-8 text-brand-blue" />
-            Gestión de Horarios
-          </h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2"><Clock className="w-8 h-8 text-brand-blue" />Gestión de Horarios</h1>
           <p className="text-gray-400 mt-2 text-lg">Configuración de turnos y tolerancias de ingreso</p>
         </div>
         <div className="flex gap-3">
-          <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-md" onPress={cargarHorarios}>
-            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-            Sincronizar
-          </Button>
-          <Button className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20" onPress={() => setIsOpen(true)}>
-            <Plus size={18} />
-            Nuevo Horario
-          </Button>
+          <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-md" onPress={cargarHorarios}><RefreshCw size={18} className={loading ? "animate-spin" : ""} />Sincronizar</Button>
+          <Button className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20" onPress={() => setIsOpen(true)}><Plus size={18} />Nuevo Horario</Button>
         </div>
       </div>
 
@@ -148,22 +110,11 @@ export default function HorariosPage() {
               ) : (
                 horarios.map((horario) => (
                   <tr key={horario.id} className="hover:bg-white/5 transition-colors group">
-                    <td className="p-4">
-                      <span className="font-medium text-white">{horario.nombre}</span>
-                    </td>
+                    <td className="p-4"><span className="font-medium text-white">{horario.nombre}</span></td>
                     <td className="p-4 text-gray-300 font-mono">{formatearHora(horario.horaEntrada)}</td>
                     <td className="p-4 text-gray-300 font-mono">{formatearHora(horario.horaSalida)}</td>
-                    <td className="p-4">
-                      <Chip size="sm" variant="flat" className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                        {horario.toleranciaMinutos} min
-                      </Chip>
-                    </td>
-                    <td className="p-4">
-                      <Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarHorario(horario.id)}>
-                        <Trash2 size={16} className="mr-1" />
-                        Eliminar
-                      </Button>
-                    </td>
+                    <td className="p-4"><Chip size="sm" variant="flat" className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">{horario.toleranciaMinutos} min</Chip></td>
+                    <td className="p-4"><Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarHorario(horario.id)}><Trash2 size={16} className="mr-1" />Eliminar</Button></td>
                   </tr>
                 ))
               )}
@@ -178,9 +129,7 @@ export default function HorariosPage() {
             <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
               {({ close }) => (
                 <form onSubmit={handleSubmit}>
-                  <Modal.Header>
-                    <Modal.Heading className="text-white text-xl font-bold">Agregar Nuevo Turno</Modal.Heading>
-                  </Modal.Header>
+                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">Agregar Nuevo Turno</Modal.Heading></Modal.Header>
                   <Modal.Body className="flex flex-col gap-4 py-6">
                     <TextField isRequired>
                       <Label className="text-gray-300 font-medium mb-1">Nombre del Turno</Label>
