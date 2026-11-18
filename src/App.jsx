@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ToastProvider } from "@heroui/react"; // Importamos los Toasts
+import { ToastProvider } from "@heroui/react"; // IMPORTANTE
 import Layout from "./components/Layout";
 
 import EmpleadosPage from "./pages/EmpleadosPage";
@@ -15,7 +15,6 @@ function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // AHORA REVISA sessionStorage
     const token = sessionStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
