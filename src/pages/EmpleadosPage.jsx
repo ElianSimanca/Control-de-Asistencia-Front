@@ -1,4 +1,3 @@
-import { addToast } from "@heroui/react";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
@@ -9,6 +8,7 @@ import {
   Modal,
   Chip,
   useOverlayState,
+  addToast, // IMPORTAMOS EL TOAST
 } from "@heroui/react";
 import { Plus, UserCheck, UserX, Clock, Search } from "lucide-react";
 
@@ -78,9 +78,20 @@ export default function EmpleadosPage() {
       }
       cerrarModal();
       await cargarDatos();
+      // NOTIFICACIÓN DE ÉXITO
+      addToast({
+        title: "Empleado registrado",
+        description: "El empleado se guardó correctamente.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al guardar empleado:", err);
-      alert("No se pudo guardar el empleado.");
+      // NOTIFICACIÓN DE ERROR
+      addToast({
+        title: "Error al guardar",
+        description: "No se pudo registrar el empleado.",
+        color: "danger",
+      });
     }
   };
 
@@ -107,9 +118,18 @@ export default function EmpleadosPage() {
       }
       cerrarModal();
       await cargarDatos();
+      addToast({
+        title: "Empleado actualizado",
+        description: "Los datos se guardaron correctamente.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al actualizar empleado:", err);
-      alert("No se pudo actualizar el empleado.");
+      addToast({
+        title: "Error al actualizar",
+        description: "No se pudo actualizar el empleado.",
+        color: "danger",
+      });
     }
   };
 
@@ -117,9 +137,18 @@ export default function EmpleadosPage() {
     try {
       await api.put(`/empleados/${id}/estado`);
       await cargarDatos();
+      addToast({
+        title: "Estado cambiado",
+        description: "El estado del empleado se modificó correctamente.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al cambiar estado:", err);
-      alert("No se pudo cambiar el estado.");
+      addToast({
+        title: "Error",
+        description: "No se pudo cambiar el estado.",
+        color: "danger",
+      });
     }
   };
 
