@@ -6,36 +6,29 @@
     <title>El Entonador Ferretero - Control de Asistencia</title>
     <style>
       :root {
-        --bg-color: #0F172A; /* Azul muy oscuro */
+        --bg-color: #0F172A;
         --text-color: #F8FAFC;
         --glass-bg: rgba(255, 255, 255, 0.05);
         --glass-border: rgba(255, 255, 255, 0.1);
       }
 
-      /* Si tienes la imagen, descomenta y usa esto: */
-      /*
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('data:image/png;base64,TU_BASE64_AQUI');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        color: var(--text-color);
-        font-family: 'Inter', system-ui, sans-serif;
-      }
-      */
-
-      /* Fondo alternativo sin imagen (por ahora) */
       body {
         margin: 0;
         min-height: 100vh;
         background-color: var(--bg-color);
         color: var(--text-color);
         font-family: 'Inter', system-ui, sans-serif;
+        
+        /* SI TIENES LA IMAGEN DE FONDO, BORRA LA LÍNEA DE ARRIBA (background-color) Y DESCOMENTA ESTAS: */
+        /*
+        background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('ruta-a-tu-imagen.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        */
       }
 
-      /* Clase para el efecto cristal */
+      /* Efecto Cristal (Glassmorphism) */
       .glass-panel {
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
