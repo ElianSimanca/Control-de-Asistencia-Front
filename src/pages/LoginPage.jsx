@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Card, Input, Button } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { User, Lock, LogIn, AlertCircle } from "lucide-react";
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -38,53 +39,91 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-sm">
-        <div className="flex flex-col items-center pb-0 pt-6 px-4">
-          <h2 className="text-2xl font-bold">Iniciar Sesión</h2>
-          <p className="text-default-500 text-sm mt-1">
-            Panel de Control de Asistencia
+    <div className="min-h-screen flex items-center justify-center p-4">
+      {/* TARJETA DE LOGIN CON EFECTO CRISTAL */}
+      <div className="glass-panel w-full max-w-md p-8 relative overflow-hidden">
+        
+        {/* Destello decorativo detrás del logo */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-brand-blue/30 rounded-full blur-[60px] pointer-events-none"></div>
+
+        {/* LOGO Y TÍTULO */}
+        <div className="flex flex-col items-center mb-8 relative z-10">
+          <div className="w-24 h-24 bg-white rounded-2xl p-2 shadow-2xl mb-4 transform hover:scale-105 transition-transform duration-300">
+            <img
+              src="/logo.png"
+              alt="El Entonador Ferretero"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight text-center">
+            El Entonador Ferretero
+          </h1>
+          <p className="text-gray-400 mt-1 text-sm font-medium">
+            Portal de Asistencia Corporativa
           </p>
         </div>
 
-        <div className="flex flex-col overflow-hidden p-6">
+        {/* FORMULARIO */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-10">
+          
+          {/* Mensaje de Error */}
           {error && (
-            <div className="bg-danger-50 text-danger p-3 rounded-medium mb-4 text-sm text-center">
-              {error}
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-xl flex items-center gap-3 text-sm animate-in fade-in slide-in-from-top-2">
+              <AlertCircle size={18} className="flex-shrink-0" />
+              <p>{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Input
-  isRequired
-  label="Usuario"
-  placeholder="Ej. admin"
-  variant="bordered"
-  value={username}
-  onChange={(e) => setUsername(e.target.value)}
-/>
+          {/* Input Usuario */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-300 ml-1">Usuario</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ej. admin"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-green/50 focus:ring-2 focus:ring-brand-green/20 transition-all"
+              />
+            </div>
+          </div>
 
-<Input
-  isRequired
-  type="password"
-  label="Contraseña"
-  placeholder="********"
-  variant="bordered"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-/>
+          {/* Input Contraseña */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-300 ml-1">Contraseña</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-green/50 focus:ring-2 focus:ring-brand-green/20 transition-all"
+              />
+            </div>
+          </div>
 
-            <Button
-              type="submit"
-              color="primary"
-              isLoading={isLoading}
-              className="mt-2"
-            >
-              Entrar
-            </Button>
-          </form>
-        </div>
-      </Card>
+          {/* Botón de Ingreso */}
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            className="w-full mt-2 bg-brand-green hover:bg-green-700 text-white font-semibold py-6 rounded-xl shadow-lg shadow-brand-green/20 transition-all duration-300 text-lg"
+          >
+            {!isLoading && <LogIn size={20} className="mr-2" />}
+            {isLoading ? "Verificando..." : "Ingresar al Sistema"}
+          </Button>
+
+        </form>
+
+        {/* Footer de la tarjeta */}
+        <p className="text-center text-xs text-gray-500 mt-8 relative z-10">
+          © {new Date().getFullYear()} El Entonador Ferretero.<br/> Todos los derechos reservados.
+        </p>
+
+      </div>
     </div>
   );
 }
