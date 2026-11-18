@@ -163,16 +163,27 @@ export default function TarjetasPage() {
       </div>
 
       {/* TABLA */}
-      <div className="glass-panel p-2">
-        <Table>
+      <div className="glass-panel p-2 overflow-hidden">
+        <Table 
+          classNames={{
+            wrapper: "bg-transparent shadow-none p-0",
+            table: "bg-transparent",
+            thead: "bg-transparent",
+            th: "bg-transparent text-gray-400 font-semibold border-b border-white/10 pb-4",
+            tbody: "bg-transparent",
+            tr: "border-b border-white/5 hover:bg-white/5 transition-colors cursor-default",
+            td: "text-white py-4",
+          }}
+        >
           <Table.ScrollContainer>
             <Table.Content aria-label="Tabla de tarjetas">
+              
               <Table.Header>
-                <Table.Column isRowHeader className="bg-transparent text-gray-400 font-semibold">UID TARJETA</Table.Column>
-                <Table.Column className="bg-transparent text-gray-400 font-semibold">EMPLEADO</Table.Column>
-                <Table.Column className="bg-transparent text-gray-400 font-semibold">DOCUMENTO</Table.Column>
-                <Table.Column className="bg-transparent text-gray-400 font-semibold">ESTADO</Table.Column>
-                <Table.Column className="bg-transparent text-gray-400 font-semibold">ACCIONES</Table.Column>
+                <Table.Column isRowHeader>UID TARJETA</Table.Column>
+                <Table.Column>EMPLEADO</Table.Column>
+                <Table.Column>DOCUMENTO</Table.Column>
+                <Table.Column>ESTADO</Table.Column>
+                <Table.Column>ACCIONES</Table.Column>
               </Table.Header>
 
               <Table.Body
@@ -182,7 +193,7 @@ export default function TarjetasPage() {
                 }
               >
                 {(tarjeta) => (
-                  <Table.Row key={tarjeta.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <Table.Row key={tarjeta.id}>
                     
                     <Table.Cell>
                       <span className="font-mono text-white font-medium tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">
@@ -205,8 +216,10 @@ export default function TarjetasPage() {
                       )}
                     </Table.Cell>
 
-                    <Table.Cell className="text-gray-400 font-mono">
-                      {tarjeta.empleado?.documento || "-"}
+                    <Table.Cell>
+                      <span className="text-gray-400 font-mono">
+                        {tarjeta.empleado?.documento || "-"}
+                      </span>
                     </Table.Cell>
 
                     <Table.Cell>
@@ -225,7 +238,6 @@ export default function TarjetasPage() {
 
                     <Table.Cell>
                       <div className="flex gap-2 flex-wrap">
-                        
                         {!tarjeta.empleado && (
                           <Button
                             size="sm"
@@ -277,9 +289,7 @@ export default function TarjetasPage() {
         </Table>
       </div>
 
-      {/* =====================================================
-          MODAL ASIGNACIÓN
-          ===================================================== */}
+      {/* MODAL ASIGNACIÓN (Se mantiene igual) */}
       <Modal>
         <Modal.Backdrop
           isOpen={isOpen}
@@ -298,7 +308,6 @@ export default function TarjetasPage() {
                   </Modal.Header>
 
                   <Modal.Body className="flex flex-col gap-4 py-6">
-                    
                     {tarjetaSeleccionada && (
                       <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                         <p className="text-sm text-gray-400">Tarjeta detectada</p>
@@ -329,7 +338,6 @@ export default function TarjetasPage() {
                           ))}
                       </select>
                     </div>
-
                   </Modal.Body>
 
                   <Modal.Footer>
