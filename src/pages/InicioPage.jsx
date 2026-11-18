@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Card, Chip } from "@heroui/react";
+import { Chip } from "@heroui/react";
 import {
   Users,
   UserCheck,
@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   LogIn,
   LogOut,
+  Activity,
 } from "lucide-react";
 
 export default function InicioPage() {
@@ -34,22 +35,15 @@ export default function InicioPage() {
 
   useEffect(() => {
     cargarDatos();
-
     const intervalo = setInterval(cargarDatos, 3000);
-
     return () => clearInterval(intervalo);
   }, []);
 
   // =========================
-  // FECHA ACTUAL
+  // FECHAS
   // =========================
-
   const hoy = new Date();
-
-  const diaHoy = hoy.toLocaleDateString("es-CO", {
-    weekday: "long",
-  });
-
+  const diaHoy = hoy.toLocaleDateString("es-CO", { weekday: "long" });
   const fechaHoy = hoy.toLocaleDateString("es-CO", {
     day: "numeric",
     month: "long",
@@ -57,12 +51,10 @@ export default function InicioPage() {
   });
 
   // =========================
-  // MARCACIONES DE HOY
+  // LÓGICA DE DATOS (Intacta)
   // =========================
-
   const marcacionesHoy = marcaciones.filter((marcacion) => {
     const fecha = new Date(marcacion.fechaHora);
-
     return (
       fecha.getFullYear() === hoy.getFullYear() &&
       fecha.getMonth() === hoy.getMonth() &&
@@ -70,19 +62,7 @@ export default function InicioPage() {
     );
   });
 
-  // =========================
-  // EMPLEADOS ACTIVOS
-  // =========================
-
-  const empleadosActivos = empleados.filter(
-    (empleado) => empleado.activo
-  );
-
-  // =========================
-  // PRESENTES
-  // =========================
-  // Un empleado se considera presente
-  // si tiene una ENTRADA hoy.
+  const empleadosActivos = empleados.filter((empleado) => empleado.activo);
 
   const empleadosPresentes = new Set(
     marcacionesHoy
@@ -92,317 +72,223 @@ export default function InicioPage() {
   );
 
   const presentes = empleadosPresentes.size;
-
-  const ausentes = Math.max(
-    empleadosActivos.length - presentes,
-    0
-  );
-
-  // =========================
-  // RETRASOS
-  // =========================
-
-  const retrasos = marcacionesHoy.filter(
-    (m) => m.minutosRetraso > 0
-  ).length;
-
-  // =========================
-  // ÚLTIMAS MARCACIONES
-  // =========================
+  const ausentes = Math.max(empleadosActivos.length - presentes, 0);
+  const retrasos = marcacionesHoy.filter((m) => m.minutosRetraso > 0).length;
 
   const ultimasMarcaciones = [...marcacionesHoy]
-    .sort(
-      (a, b) =>
-        new Date(b.fechaHora) -
-        new Date(a.fechaHora)
-    )
+    .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora))
     .slice(0, 8);
 
+  // =========================
+  // CONFIGURACIÓN DE TARJETAS KPI
+  // =========================
+  const kpis = [
+    {
+      title: "Empleados Activos",
+      value: empleadosActivos.length,
+      icon: <Users size={28} className="text-brand-blue" />,
+      bgColor: "bg-brand-blue/10",
+    },
+    {
+      title: "Presentes",
+      value: presentes,
+      icon: <UserCheck size={28} className="text-brand-green" />,
+      bgColor: "bg-brand-green/10",
+    },
+    {
+      title: "Ausentes",
+      value: ausentes,
+      icon: <UserX size={28} className="text-brand-red" />,
+      bgColor: "bg-brand-red/10",
+    },
+    {
+      title: "Retrasos",
+      value: retrasos,
+      icon: <Clock size={28} className="text-brand-yellow" />,
+      bgColor: "bg-brand-yellow/10",
+    },
+  ];
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-
-      {/* =========================
-          CABECERA
-      ========================= */}
-
+    <div className="max-w-7xl mx-auto">
+      {/* CABECERA */}
       <div className="mb-8">
-
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-3xl font-bold text-white tracking-tight">
           Dashboard
         </h1>
-
-        <p className="text-gray-500">
+        <p className="text-gray-400 mt-1 text-lg">
           Resumen del control de asistencia
         </p>
-
-        <p className="mt-2 text-lg font-semibold capitalize">
-          {diaHoy}, {fechaHoy}
-        </p>
-
+        <div className="glass-panel px-4 py-2 mt-4 inline-flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></div>
+          <p className="text-sm font-medium text-gray-300 capitalize">
+            {diaHoy}, <span className="text-white">{fechaHoy}</span>
+          </p>
+        </div>
       </div>
 
-      {/* =========================
-          TARJETAS DE RESUMEN
-      ========================= */}
+      {/* TARJETAS DE RESUMEN (Glassmorphism) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {kpis.map((kpi, index) => (
+          <div
+            key={index}
+            className="glass-panel p-6 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300"
+          >
+            {/* Destello de fondo */}
+            <div
+              className={`absolute -right-6 -top-6 w-24 h-24 rounded-full blur-2xl ${kpi.bgColor} group-hover:scale-150 transition-transform duration-500`}
+            ></div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-
-        {/* EMPLEADOS */}
-
-        <Card>
-          <Card.Header>
-            <div className="flex items-center justify-between w-full">
+            <div className="flex justify-between items-start relative z-10">
               <div>
-                <Card.Title>
-                  Empleados activos
-                </Card.Title>
-                <p className="text-3xl font-bold mt-2">
-                  {empleadosActivos.length}
+                <p className="text-sm font-medium text-gray-400">{kpi.title}</p>
+                <p className="text-4xl font-bold text-white mt-2">
+                  {loading ? <span className="skeleton inline-block w-10 h-10"></span> : kpi.value}
                 </p>
               </div>
-
-              <Users size={30} />
-            </div>
-          </Card.Header>
-        </Card>
-
-        {/* PRESENTES */}
-
-        <Card>
-          <Card.Header>
-            <div className="flex items-center justify-between w-full">
-              <div>
-                <Card.Title>
-                  Presentes
-                </Card.Title>
-
-                <p className="text-3xl font-bold mt-2">
-                  {presentes}
-                </p>
+              <div className={`p-3 rounded-2xl bg-white/5 border border-white/10`}>
+                {kpi.icon}
               </div>
-
-              <UserCheck size={30} />
             </div>
-          </Card.Header>
-        </Card>
-
-        {/* AUSENTES */}
-
-        <Card>
-          <Card.Header>
-            <div className="flex items-center justify-between w-full">
-              <div>
-                <Card.Title>
-                  Ausentes
-                </Card.Title>
-
-                <p className="text-3xl font-bold mt-2">
-                  {ausentes}
-                </p>
-              </div>
-
-              <UserX size={30} />
-            </div>
-          </Card.Header>
-        </Card>
-
-        {/* RETRASOS */}
-
-        <Card>
-          <Card.Header>
-            <div className="flex items-center justify-between w-full">
-              <div>
-                <Card.Title>
-                  Retrasos
-                </Card.Title>
-
-                <p className="text-3xl font-bold mt-2">
-                  {retrasos}
-                </p>
-              </div>
-
-              <Clock size={30} />
-            </div>
-          </Card.Header>
-        </Card>
-
-      </div>
-
-      {/* =========================
-          RESUMEN DEL DÍA
-      ========================= */}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-
-        <Card>
-          <Card.Header>
-            <Card.Title>
-              Marcaciones de hoy
-            </Card.Title>
-          </Card.Header>
-
-          <Card.Content>
-            <div className="flex items-center gap-3">
-              <ClipboardCheck size={24} />
-
-              <span className="text-2xl font-bold">
-                {marcacionesHoy.length}
-              </span>
-            </div>
-          </Card.Content>
-        </Card>
-
-        <Card>
-          <Card.Header>
-            <Card.Title>
-              Entradas
-            </Card.Title>
-          </Card.Header>
-
-          <Card.Content>
-            <div className="flex items-center gap-3">
-              <LogIn size={24} />
-
-              <span className="text-2xl font-bold">
-                {
-                  marcacionesHoy.filter(
-                    (m) => m.tipo === "ENTRADA"
-                  ).length
-                }
-              </span>
-            </div>
-          </Card.Content>
-        </Card>
-
-        <Card>
-          <Card.Header>
-            <Card.Title>
-              Salidas
-            </Card.Title>
-          </Card.Header>
-
-          <Card.Content>
-            <div className="flex items-center gap-3">
-              <LogOut size={24} />
-
-              <span className="text-2xl font-bold">
-                {
-                  marcacionesHoy.filter(
-                    (m) => m.tipo === "SALIDA"
-                  ).length
-                }
-              </span>
-            </div>
-          </Card.Content>
-        </Card>
-
-      </div>
-
-      {/* =========================
-          ÚLTIMAS MARCACIONES
-      ========================= */}
-
-      <Card>
-
-        <Card.Header>
-          <div className="flex items-center justify-between w-full">
-
-            <div>
-              <Card.Title>
-                Últimas marcaciones
-              </Card.Title>
-
-              <p className="text-sm text-gray-500">
-                Actividad registrada hoy
-              </p>
-            </div>
-
-            <Chip color="primary">
-              Actualización automática
-            </Chip>
-
           </div>
-        </Card.Header>
+        ))}
+      </div>
 
-        <Card.Content>
+      {/* RESUMEN DEL DÍA (Marcaciones) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Marcaciones totales */}
+        <div className="glass-panel p-6 flex items-center gap-4">
+          <div className="p-4 rounded-2xl bg-purple-500/10 text-purple-400">
+            <ClipboardCheck size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-400">Marcaciones Hoy</p>
+            <p className="text-2xl font-bold text-white">
+              {loading ? <span className="skeleton inline-block w-8 h-8"></span> : marcacionesHoy.length}
+            </p>
+          </div>
+        </div>
 
+        {/* Entradas */}
+        <div className="glass-panel p-6 flex items-center gap-4">
+          <div className="p-4 rounded-2xl bg-green-500/10 text-green-400">
+            <LogIn size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-400">Entradas</p>
+            <p className="text-2xl font-bold text-white">
+              {loading ? (
+                <span className="skeleton inline-block w-8 h-8"></span>
+              ) : (
+                marcacionesHoy.filter((m) => m.tipo === "ENTRADA").length
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Salidas */}
+        <div className="glass-panel p-6 flex items-center gap-4">
+          <div className="p-4 rounded-2xl bg-orange-500/10 text-orange-400">
+            <LogOut size={28} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-400">Salidas</p>
+            <p className="text-2xl font-bold text-white">
+              {loading ? (
+                <span className="skeleton inline-block w-8 h-8"></span>
+              ) : (
+                marcacionesHoy.filter((m) => m.tipo === "SALIDA").length
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ÚLTIMAS MARCACIONES */}
+      <div className="glass-panel">
+        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-white">Últimas Marcaciones</h2>
+            <p className="text-sm text-gray-400 mt-1">Actividad registrada hoy</p>
+          </div>
+          <Chip
+            size="sm"
+            variant="flat"
+            className="bg-brand-blue/20 text-blue-300 border border-blue-500/30 animate-pulse"
+          >
+            En vivo
+          </Chip>
+        </div>
+
+        <div className="p-2">
           {loading ? (
-
-            <p className="text-gray-500">
-              Cargando marcaciones...
-            </p>
-
+            <div className="p-6 space-y-4">
+              <div className="skeleton h-12 w-full"></div>
+              <div className="skeleton h-12 w-full"></div>
+              <div className="skeleton h-12 w-full"></div>
+            </div>
           ) : ultimasMarcaciones.length === 0 ? (
-
-            <p className="text-gray-500">
+            <div className="p-8 text-center text-gray-400">
               No hay marcaciones registradas hoy.
-            </p>
-
+            </div>
           ) : (
-
-            <div className="divide-y">
-
+            <div className="flex flex-col">
               {ultimasMarcaciones.map((marcacion) => {
-
-                const fecha =
-                  new Date(marcacion.fechaHora);
-
+                const fecha = new Date(marcacion.fechaHora);
                 return (
                   <div
                     key={marcacion.id}
-                    className="py-4 flex items-center justify-between"
+                    className="flex items-center justify-between p-4 hover:bg-white/5 rounded-xl transition-colors m-1"
                   >
-
-                    <div>
-                      <p className="font-semibold">
-                        {marcacion.empleado?.nombre ||
-                          "Sin empleado"}
-                      </p>
-
-                      <p className="text-sm text-gray-500">
-                        {marcacion.empleado?.documento ||
-                          "-"}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      {/* Avatar circular con la inicial */}
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold border border-white/10">
+                        {marcacion.empleado?.nombre?.charAt(0) || "?"}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white">
+                          {marcacion.empleado?.nombre || "Sin empleado"}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Doc: {marcacion.empleado?.documento || "-"}
+                        </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-4">
-
-                      <span className="font-mono">
-                        {fecha.toLocaleTimeString(
-                          "es-CO"
-                        )}
+                      <span className="font-mono text-gray-300 bg-black/20 px-3 py-1 rounded-md text-sm border border-white/5">
+                        {fecha.toLocaleTimeString("es-CO")}
                       </span>
 
                       <Chip
-                        color={
+                        size="sm"
+                        variant="flat"
+                        className={
                           marcacion.tipo === "ENTRADA"
-                            ? "success"
-                            : "warning"
+                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                            : "bg-orange-500/10 text-orange-400 border border-orange-500/20"
                         }
                       >
                         {marcacion.tipo}
                       </Chip>
 
                       {marcacion.minutosRetraso > 0 && (
-                        <Chip color="danger">
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          className="bg-red-500/10 text-red-400 border border-red-500/20"
+                        >
                           {marcacion.minutosRetraso} min
                         </Chip>
                       )}
-
                     </div>
-
                   </div>
                 );
               })}
-
             </div>
-
           )}
-
-        </Card.Content>
-
-      </Card>
-
+        </div>
+      </div>
     </div>
   );
 }
