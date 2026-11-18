@@ -8,7 +8,7 @@ import {
   Modal,
   Chip,
   useOverlayState,
-  addToast,
+  toast, // <-- IMPORTACIÓN CORREGIDA
 } from "@heroui/react";
 import { Plus, UserCheck, UserX, Clock, Search } from "lucide-react";
 
@@ -65,45 +65,25 @@ export default function EmpleadosPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validar si el documento ya existe (Solo si no estamos editando)
     if (!editando) {
       const existe = empleados.find((emp) => emp.documento === documento);
       if (existe) {
-        addToast({
-          title: "Documento duplicado",
-          description: "Ya existe un empleado con este número de documento.",
-          color: "warning",
-        });
-        return; // Detenemos el guardado
+        toast.warning("Documento duplicado", { description: "Ya existe un empleado con este documento." });
+        return;
       }
     }
 
     try {
-      const response = await api.post("/empleados", {
-        nombre,
-        documento,
-        cargo,
-        activo: true,
-      });
+      const response = await api.post("/empleados", { nombre, documento, cargo, activo: true });
       const nuevoEmpleado = response.data;
-      if (horarioId) {
-        await api.put(`/empleados/${nuevoEmpleado.id}/horario/${horarioId}`);
-      }
+      if (horarioId) await api.put(`/empleados/${nuevoEmpleado.id}/horario/${horarioId}`);
+      
       cerrarModal();
       await cargarDatos();
-      addToast({
-        title: "Empleado registrado",
-        description: "El empleado se guardó correctamente.",
-        color: "success",
-      });
+      toast.success("Empleado registrado", { description: "El empleado se guardó correctamente." });
     } catch (err) {
       console.error("Error al guardar empleado:", err);
-      addToast({
-        title: "Error al guardar",
-        description: "No se pudo registrar el empleado.",
-        color: "danger",
-      });
+      toast.danger("Error al guardar", { description: "No se pudo registrar el empleado." });
     }
   };
 
@@ -119,29 +99,15 @@ export default function EmpleadosPage() {
   const handleActualizar = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/empleados/${editando.id}`, {
-        nombre,
-        documento,
-        cargo,
-        activo: editando.activo,
-      });
-      if (horarioId) {
-        await api.put(`/empleados/${editando.id}/horario/${horarioId}`);
-      }
+      await api.put(`/empleados/${editando.id}`, { nombre, documento, cargo, activo: editando.activo });
+      if (horarioId) await api.put(`/empleados/${editando.id}/horario/${horarioId}`);
+      
       cerrarModal();
       await cargarDatos();
-      addToast({
-        title: "Empleado actualizado",
-        description: "Los datos se guardaron correctamente.",
-        color: "success",
-      });
+      toast.success("Empleado actualizado", { description: "Los datos se guardaron correctamente." });
     } catch (err) {
       console.error("Error al actualizar empleado:", err);
-      addToast({
-        title: "Error al actualizar",
-        description: "No se pudo actualizar el empleado.",
-        color: "danger",
-      });
+      toast.danger("Error al actualizar", { description: "No se pudo actualizar el empleado." });
     }
   };
 
@@ -149,25 +115,15 @@ export default function EmpleadosPage() {
     try {
       await api.put(`/empleados/${id}/estado`);
       await cargarDatos();
-      addToast({
-        title: "Estado cambiado",
-        description: "El estado del empleado se modificó.",
-        color: "success",
-      });
+      toast.success("Estado cambiado", { description: "El estado del empleado se modificó." });
     } catch (err) {
       console.error("Error al cambiar estado:", err);
-      addToast({
-        title: "Error",
-        description: "No se pudo cambiar el estado.",
-        color: "danger",
-      });
+      toast.danger("Error", { description: "No se pudo cambiar el estado." });
     }
   };
 
   const empleadosFiltrados = empleados.filter(
-    (emp) =>
-      emp.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      emp.documento?.includes(busqueda)
+    (emp) => emp.nombre?.toLowerCase().includes(busqueda.toLowerCase()) || emp.documento?.includes(busqueda)
   );
 
   return (
@@ -185,13 +141,7 @@ export default function EmpleadosPage() {
       <div className="glass-panel p-4 mb-6">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o documento..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all"
-          />
+          <input type="text" placeholder="Buscar por nombre o documento..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all" />
         </div>
       </div>
 
@@ -213,9 +163,7 @@ export default function EmpleadosPage() {
                 <tr key={emp.id} className="hover:bg-white/5 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-blue-300 font-bold border border-brand-blue/30 text-sm">
-                        {emp.nombre?.charAt(0) || "?"}
-                      </div>
+                      <div className="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-blue-300 font-bold border border-brand-blue/30 text-sm">{emp.nombre?.charAt(0) || "?"}</div>
                       <span className="font-medium text-white">{emp.nombre}</span>
                     </div>
                   </td>
@@ -240,9 +188,7 @@ export default function EmpleadosPage() {
                   </td>
                   <td className="p-4">
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-white/5 hover:bg-white/20 text-white border border-white/10" onPress={() => abrirEditar(emp)}>
-                        <span>Editar</span>
-                      </Button>
+                      <Button size="sm" className="bg-white/5 hover:bg-white/20 text-white border border-white/10" onPress={() => abrirEditar(emp)}><span>Editar</span></Button>
                       <Button size="sm" className={emp.activo ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20"} onPress={() => cambiarEstado(emp.id)}>
                         <span>{emp.activo ? "Desactivar" : "Activar"}</span>
                       </Button>
@@ -261,9 +207,7 @@ export default function EmpleadosPage() {
             <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
               {({ close }) => (
                 <form onSubmit={editando ? handleActualizar : handleSubmit}>
-                  <Modal.Header>
-                    <Modal.Heading className="text-white text-xl font-bold">{editando ? "Editar Empleado" : "Registrar Nuevo Empleado"}</Modal.Heading>
-                  </Modal.Header>
+                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">{editando ? "Editar Empleado" : "Registrar Nuevo Empleado"}</Modal.Heading></Modal.Header>
                   <Modal.Body className="flex flex-col gap-4 py-6">
                     <TextField isRequired>
                       <Label className="text-gray-300 font-medium mb-1">Nombre completo</Label>
