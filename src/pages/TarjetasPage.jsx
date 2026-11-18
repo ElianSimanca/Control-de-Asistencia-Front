@@ -1,4 +1,3 @@
-import { addToast } from "@heroui/react";
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
@@ -6,6 +5,7 @@ import {
   Label,
   Modal,
   Chip,
+  addToast, // IMPORTAMOS EL TOAST
 } from "@heroui/react";
 import { Search, Link as LinkIcon, Unlink, Trash2, ShieldAlert, ShieldCheck } from "lucide-react";
 
@@ -47,7 +47,11 @@ export default function TarjetasPage() {
   const asignarTarjeta = async (e) => {
     e.preventDefault();
     if (!tarjetaSeleccionada || !empleadoId) {
-      alert("Seleccione un empleado.");
+      addToast({
+        title: "Atención",
+        description: "Seleccione un empleado.",
+        color: "warning",
+      });
       return;
     }
 
@@ -59,12 +63,25 @@ export default function TarjetasPage() {
       setEmpleadoId("");
       setIsOpen(false);
       await cargarDatos();
+      addToast({
+        title: "Tarjeta asignada",
+        description: "La tarjeta se vinculó al empleado correctamente.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al asignar tarjeta:", err);
       if (err.response?.status === 409) {
-        alert("El empleado ya tiene una tarjeta asignada.");
+        addToast({
+          title: "Conflicto",
+          description: "El empleado ya tiene una tarjeta asignada.",
+          color: "warning",
+        });
       } else {
-        alert("No se pudo asignar la tarjeta.");
+        addToast({
+          title: "Error",
+          description: "No se pudo asignar la tarjeta.",
+          color: "danger",
+        });
       }
     }
   };
@@ -76,9 +93,18 @@ export default function TarjetasPage() {
     try {
       await api.put(`/cards/${tarjeta.id}/unassign`);
       await cargarDatos();
+      addToast({
+        title: "Tarjeta desasignada",
+        description: "La tarjeta ha quedado libre.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al desasignar:", err);
-      alert("No se pudo desasignar la tarjeta.");
+      addToast({
+        title: "Error",
+        description: "No se pudo desasignar la tarjeta.",
+        color: "danger",
+      });
     }
   };
 
@@ -89,9 +115,18 @@ export default function TarjetasPage() {
         : `/cards/${tarjeta.id}/activate`;
       await api.put(endpoint);
       await cargarDatos();
+      addToast({
+        title: "Estado actualizado",
+        description: "El estado de la tarjeta ha cambiado.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al cambiar estado:", err);
-      alert("No se pudo cambiar el estado.");
+      addToast({
+        title: "Error",
+        description: "No se pudo cambiar el estado.",
+        color: "danger",
+      });
     }
   };
 
@@ -102,9 +137,18 @@ export default function TarjetasPage() {
     try {
       await api.delete(`/cards/${tarjeta.id}`);
       await cargarDatos();
+      addToast({
+        title: "Tarjeta eliminada",
+        description: "La tarjeta se borró del sistema.",
+        color: "success",
+      });
     } catch (err) {
       console.error("Error al eliminar:", err);
-      alert("No se pudo eliminar la tarjeta.");
+      addToast({
+        title: "Error",
+        description: "No se pudo eliminar la tarjeta.",
+        color: "danger",
+      });
     }
   };
 
@@ -116,20 +160,13 @@ export default function TarjetasPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
-            Gestión de Tarjetas RFID
-          </h1>
-          <p className="text-gray-400 mt-2 text-lg">
-            Las tarjetas se registran automáticamente al pasar por el lector.
-          </p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Gestión de Tarjetas RFID</h1>
+          <p className="text-gray-400 mt-2 text-lg">Las tarjetas se registran automáticamente al pasar por el lector.</p>
         </div>
       </div>
 
-      {/* BUSCADOR */}
       <div className="glass-panel p-4 mb-6">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
@@ -143,7 +180,6 @@ export default function TarjetasPage() {
         </div>
       </div>
 
-      {/* TABLA NATIVA (SIN HEROUI) */}
       <div className="glass-panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -158,29 +194,17 @@ export default function TarjetasPage() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
-                    Cargando tarjetas...
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="p-8 text-center text-gray-400">Cargando tarjetas...</td></tr>
               ) : tarjetasFiltradas.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
-                    No hay tarjetas registradas.
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="p-8 text-center text-gray-400">No hay tarjetas registradas.</td></tr>
               ) : (
                 tarjetasFiltradas.map((tarjeta) => (
                   <tr key={tarjeta.id} className="hover:bg-white/5 transition-colors group">
-                    
-                    {/* UID */}
                     <td className="p-4">
                       <span className="font-mono text-white font-medium tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">
                         {tarjeta.uid}
                       </span>
                     </td>
-
-                    {/* EMPLEADO */}
                     <td className="p-4">
                       {tarjeta.empleado?.nombre ? (
                         <div className="flex items-center gap-2">
@@ -195,70 +219,31 @@ export default function TarjetasPage() {
                         </span>
                       )}
                     </td>
-
-                    {/* DOCUMENTO */}
                     <td className="p-4">
-                      <span className="text-gray-400 font-mono">
-                        {tarjeta.empleado?.documento || "-"}
-                      </span>
+                      <span className="text-gray-400 font-mono">{tarjeta.empleado?.documento || "-"}</span>
                     </td>
-
-                    {/* ESTADO */}
                     <td className="p-4">
-                      <Chip
-                        size="sm"
-                        variant="flat"
-                        className={
-                          tarjeta.activa
-                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                            : "bg-red-500/10 text-red-400 border border-red-500/20"
-                        }
-                      >
+                      <Chip size="sm" variant="flat" className={tarjeta.activa ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}>
                         {tarjeta.activa ? "Activa" : "Inactiva"}
                       </Chip>
                     </td>
-
-                    {/* ACCIONES */}
                     <td className="p-4">
                       <div className="flex gap-2 flex-wrap">
                         {!tarjeta.empleado && (
-                          <Button
-                            size="sm"
-                            className="bg-brand-blue/10 hover:bg-brand-blue/20 text-blue-400 border border-brand-blue/20 transition-all"
-                            onPress={() => abrirAsignacion(tarjeta)}
-                          >
+                          <Button size="sm" className="bg-brand-blue/10 hover:bg-brand-blue/20 text-blue-400 border border-brand-blue/20 transition-all" onPress={() => abrirAsignacion(tarjeta)}>
                             <LinkIcon size={14} className="mr-1" /> Asignar
                           </Button>
                         )}
-
                         {tarjeta.empleado && (
-                          <Button
-                            size="sm"
-                            className="bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all"
-                            onPress={() => desasignarTarjeta(tarjeta)}
-                          >
+                          <Button size="sm" className="bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all" onPress={() => desasignarTarjeta(tarjeta)}>
                             <Unlink size={14} className="mr-1" /> Desasignar
                           </Button>
                         )}
-
-                        <Button
-                          size="sm"
-                          className={
-                            tarjeta.activa
-                              ? "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 transition-all"
-                              : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition-all"
-                          }
-                          onPress={() => cambiarEstado(tarjeta)}
-                        >
+                        <Button size="sm" className={tarjeta.activa ? "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 transition-all" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition-all"} onPress={() => cambiarEstado(tarjeta)}>
                           {tarjeta.activa ? <ShieldAlert size={14} className="mr-1" /> : <ShieldCheck size={14} className="mr-1" />}
                           {tarjeta.activa ? "Desactivar" : "Activar"}
                         </Button>
-
-                        <Button
-                          size="sm"
-                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all"
-                          onPress={() => eliminarTarjeta(tarjeta)}
-                        >
+                        <Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarTarjeta(tarjeta)}>
                           <Trash2 size={14} />
                         </Button>
                       </div>
@@ -271,80 +256,43 @@ export default function TarjetasPage() {
         </div>
       </div>
 
-      {/* MODAL ASIGNACIÓN */}
       <Modal>
-        <Modal.Backdrop
-          isOpen={isOpen}
-          onOpenChange={setIsOpen}
-          className="backdrop-blur-sm bg-black/60"
-        >
+        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} className="backdrop-blur-sm bg-black/60">
           <Modal.Container placement="center">
             <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
               {({ close }) => (
                 <form onSubmit={asignarTarjeta}>
-                  
                   <Modal.Header>
-                    <Modal.Heading className="text-white text-xl font-bold">
-                      Asignar Tarjeta RFID
-                    </Modal.Heading>
+                    <Modal.Heading className="text-white text-xl font-bold">Asignar Tarjeta RFID</Modal.Heading>
                   </Modal.Header>
-
                   <Modal.Body className="flex flex-col gap-4 py-6">
                     {tarjetaSeleccionada && (
                       <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                         <p className="text-sm text-gray-400">Tarjeta detectada</p>
-                        <p className="font-mono text-xl font-bold text-white tracking-widest mt-1">
-                          {tarjetaSeleccionada.uid}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          ID interno: {tarjetaSeleccionada.id}
-                        </p>
+                        <p className="font-mono text-xl font-bold text-white tracking-widest mt-1">{tarjetaSeleccionada.uid}</p>
+                        <p className="text-xs text-gray-500 mt-2">ID interno: {tarjetaSeleccionada.id}</p>
                       </div>
                     )}
-
                     <div>
                       <Label className="text-gray-300 font-medium mb-1">Empleado</Label>
-                      <select
-                        className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all"
-                        value={empleadoId}
-                        onChange={(e) => setEmpleadoId(e.target.value)}
-                        required
-                      >
+                      <select className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all" value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} required>
                         <option value="" className="bg-[#0B1120]">Seleccione un empleado</option>
-                        {empleados
-                          .filter((empleado) => empleado.activo)
-                          .map((empleado) => (
-                            <option key={empleado.id} value={empleado.id} className="bg-[#0B1120]">
-                              {empleado.nombre} - {empleado.documento}
-                            </option>
-                          ))}
+                        {empleados.filter((empleado) => empleado.activo).map((empleado) => (
+                          <option key={empleado.id} value={empleado.id} className="bg-[#0B1120]">{empleado.nombre} - {empleado.documento}</option>
+                        ))}
                       </select>
                     </div>
                   </Modal.Body>
-
                   <Modal.Footer>
-                    <Button
-                      type="button"
-                      className="bg-white/5 text-white hover:bg-white/10 border border-white/10"
-                      onPress={close}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20"
-                    >
-                      Asignar Tarjeta
-                    </Button>
+                    <Button type="button" className="bg-white/5 text-white hover:bg-white/10 border border-white/10" onPress={close}>Cancelar</Button>
+                    <Button type="submit" className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20">Asignar Tarjeta</Button>
                   </Modal.Footer>
-
                 </form>
               )}
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-
     </div>
   );
 }
