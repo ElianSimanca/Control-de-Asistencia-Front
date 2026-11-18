@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@heroui/react";
-import { User, Lock, LogIn, AlertCircle } from "lucide-react";
+import { User, Lock, LogIn, AlertCircle, Server, Loader2 } from "lucide-react";
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -29,7 +29,6 @@ function LoginPage({ onLogin }) {
 
       const data = await response.json();
 
-      // GUARDAMOS EN sessionStorage
       sessionStorage.setItem("token", data.token);
       onLogin();
     } catch (err) {
@@ -89,9 +88,23 @@ function LoginPage({ onLogin }) {
             className="w-full mt-2 bg-brand-green hover:bg-green-700 text-white font-semibold py-6 rounded-xl shadow-lg shadow-brand-green/20 transition-all duration-300 text-lg"
           >
             {!isLoading && <LogIn size={20} className="mr-2" />}
-            {isLoading ? "Verificando..." : "Ingresar al Sistema"}
+            {isLoading ? "Conectando..." : "Ingresar al Sistema"}
           </Button>
+
+          {/* MENSAJE DE ESPERA (Render despertando) */}
+          {isLoading && (
+            <div className="mt-4 p-3 bg-brand-blue/10 border border-brand-blue/20 rounded-xl flex items-start gap-3">
+              <Server className="text-brand-blue mt-0.5 animate-pulse" size={18} />
+              <div>
+                <p className="text-sm font-medium text-blue-300">Conectando al servidor...</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Si es la primera vez en el día, el servidor puede tardar hasta 50 segundos en despertar. Por favor, no cierres esta ventana.
+                </p>
+              </div>
+            </div>
+          )}
         </form>
+
         <p className="text-center text-xs text-gray-500 mt-8 relative z-10">
           © {new Date().getFullYear()} El Entonador Ferretero.<br/> Todos los derechos reservados.
         </p>
