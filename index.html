@@ -3,13 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>El Entonador Ferretero - Control de Asistencia</title>
+    <title>El Entonador Ferretero | Asistencia</title>
+    
+    <!-- Fuente corporativa Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
       :root {
-        --bg-color: #0F172A;
+        --bg-color: #0B1120; /* Azul profundo elegante */
         --text-color: #F8FAFC;
-        --glass-bg: rgba(255, 255, 255, 0.05);
-        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-bg: rgba(30, 41, 59, 0.6); /* Cristal más sólido */
+        --glass-border: rgba(255, 255, 255, 0.08);
       }
 
       body {
@@ -17,37 +23,31 @@
         min-height: 100vh;
         background-color: var(--bg-color);
         color: var(--text-color);
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'Outfit', system-ui, sans-serif;
         
-        /* SI TIENES LA IMAGEN DE FONDO, BORRA LA LÍNEA DE ARRIBA (background-color) Y DESCOMENTA ESTAS: */
-        /*
-        background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('ruta-a-tu-imagen.jpg');
-        background-size: cover;
-        background-position: center;
+        /* Fondo premium con destellos de luz de la marca */
+        background-image: 
+          radial-gradient(circle at top right, rgba(26, 54, 93, 0.6), transparent 40%),
+          radial-gradient(circle at bottom left, rgba(21, 128, 61, 0.3), transparent 40%);
         background-attachment: fixed;
-        */
       }
 
-      /* Efecto Cristal (Glassmorphism) */
+      /* Efecto Cristal Premium */
       .glass-panel {
         background: var(--glass-bg);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid var(--glass-border);
+        border-top: 1px solid rgba(255, 255, 255, 0.15); /* Brillo superior */
         border-radius: 1rem;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
       }
 
-      /* Animación Skeleton Loader */
-      @keyframes shimmer {
-        0% { background-position: -1000px 0; }
-        100% { background-position: 1000px 0; }
-      }
-      .skeleton {
-        background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-        background-size: 1000px 100%;
-        animation: shimmer 2s infinite linear;
-        border-radius: 0.5rem;
-      }
+      /* Scrollbar personalizada para que no se vea la de Windows */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
     </style>
   </head>
   <body>
