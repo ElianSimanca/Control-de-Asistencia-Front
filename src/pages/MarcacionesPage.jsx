@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { Button, Chip, addToast } from "@heroui/react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Loader2 } from "lucide-react";
 
 export default function MarcacionesPage() {
   const [marcaciones, setMarcaciones] = useState([]);
@@ -41,9 +41,9 @@ export default function MarcacionesPage() {
   const handleSincronizar = () => {
     cargarMarcaciones();
     addToast({
-      title: "Datos actualizados",
-      description: "La tabla de marcaciones está al día.",
-      color: "success",
+      title: "Sincronizando",
+      description: "Consultando los datos más recientes...",
+      color: "default",
     });
   };
 
@@ -78,13 +78,24 @@ export default function MarcacionesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
+              
+              {/* MENSAJE DE CARGA MEJORADO */}
               {marcacionesHoy.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
-                    {loading ? "Cargando marcaciones..." : "No hay marcaciones hoy."}
+                  <td colSpan={5} className="p-12 text-center">
+                    {loading ? (
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="animate-spin text-brand-green" size={32} />
+                        <p className="text-gray-300 font-medium">Consultando el servidor...</p>
+                        <p className="text-sm text-gray-500">Si el sistema estuvo inactivo, puede tardar hasta 1 minuto en despertar.</p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400">No hay marcaciones registradas hoy.</p>
+                    )}
                   </td>
                 </tr>
               )}
+
               {marcacionesHoy.map((m) => {
                 const fecha = new Date(m.fechaHora);
                 return (
