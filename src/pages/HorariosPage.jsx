@@ -181,4 +181,36 @@ export default function HorariosPage() {
                   <Modal.Header>
                     <Modal.Heading className="text-white text-xl font-bold">Agregar Nuevo Turno</Modal.Heading>
                   </Modal.Header>
-                  <Modal.Body className="flex flex-col gap-
+                  <Modal.Body className="flex flex-col gap-4 py-6">
+                    <TextField isRequired>
+                      <Label className="text-gray-300 font-medium mb-1">Nombre del Turno</Label>
+                      <Input name="nombre" placeholder="Ej: Turno Mañana" value={formData.nombre} onChange={handleChange} className="bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-brand-blue/50" />
+                    </TextField>
+                    <div className="grid grid-cols-2 gap-4">
+                      <TextField isRequired>
+                        <Label className="text-gray-300 font-medium mb-1">Hora de Entrada</Label>
+                        <Input type="time" name="horaEntrada" value={formData.horaEntrada} onChange={handleChange} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
+                      </TextField>
+                      <TextField isRequired>
+                        <Label className="text-gray-300 font-medium mb-1">Hora de Salida</Label>
+                        <Input type="time" name="horaSalida" value={formData.horaSalida} onChange={handleChange} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
+                      </TextField>
+                    </div>
+                    <TextField isRequired>
+                      <Label className="text-gray-300 font-medium mb-1">Tolerancia (minutos)</Label>
+                      <Input type="number" name="toleranciaMinutos" placeholder="15" value={formData.toleranciaMinutos} onChange={handleChange} min={0} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
+                    </TextField>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button className="bg-white/5 text-white hover:bg-white/10 border border-white/10" onPress={close}>Cancelar</Button>
+                    <Button type="submit" className="bg-brand-blue hover:bg-blue-700 text-white font-semibold">{guardando ? "Guardando..." : "Guardar Horario"}</Button>
+                  </Modal.Footer>
+                </form>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </div>
+  );
+}
