@@ -7,14 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Paleta basada en el logo
         brand: {
-          blue: '#1A365D',   // Azul marino principal
-          green: '#15803D',  // Verde (éxito)
-          yellow: '#CA8A04', // Amarillo (advertencia)
-          red: '#B91C1C',    // Rojo (peligro)
+          blue: '#1A365D',   // Azul marino del logo
+          green: '#15803D',  // Verde del logo
+          yellow: '#CA8A04', // Amarillo del logo
+          red: '#B91C1C',    // Rojo del logo
           dark: '#0F172A',   // Fondo oscuro general
-          glass: 'rgba(255, 255, 255, 0.05)', // Fondo de cristal
         }
       },
       backdropBlur: {
