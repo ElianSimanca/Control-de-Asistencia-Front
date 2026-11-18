@@ -1,11 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  ClipboardCheck,
-  Clock,
-  LogOut,
+  LayoutDashboard, Users, CreditCard, ClipboardCheck, Clock, LogOut,
 } from "lucide-react";
 
 const menu = [
@@ -20,49 +15,28 @@ export default function Layout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // 1. Borramos el token del localStorage
-    localStorage.removeItem("token");
-    
-    // 2. Redirigimos al usuario a la raíz (donde está el Login)
-    navigate("/");
-    
-    // 3. Recargamos la página para que App.jsx vuelva a evaluar si hay sesión
+    // BORRAMOS DE sessionStorage
+    sessionStorage.removeItem("token");
+    navigate("/login");
     window.location.reload();
   };
 
   return (
     <div className="min-h-screen flex">
-      {/* BARRA LATERAL CON EFECTO CRISTAL */}
       <aside className="glass-panel w-72 fixed h-screen flex flex-col z-50 rounded-none md:rounded-r-3xl border-l-0 border-t-0 border-b-0">
-        
-        {/* LOGO Y TÍTULO */}
         <div className="p-8 border-b border-white/5 flex items-center gap-4">
-          <img
-            src="/logo.png"
-            alt="El Entonador Ferretero"
-            className="w-14 h-14 object-contain bg-white rounded-xl p-1.5 shadow-xl"
-          />
+          <img src="/logo.png" alt="El Entonador Ferretero" className="w-14 h-14 object-contain bg-white rounded-xl p-1.5 shadow-xl" />
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight leading-tight">
-              El Entonador
-            </h1>
-            <p className="text-xs font-semibold text-brand-green tracking-widest uppercase mt-1">
-              Ferretero
-            </p>
+            <h1 className="text-xl font-bold text-white tracking-tight leading-tight">El Entonador</h1>
+            <p className="text-xs font-semibold text-brand-green tracking-widest uppercase mt-1">Ferretero</p>
           </div>
         </div>
 
-        {/* MENÚ DE NAVEGACIÓN */}
         <nav className="p-5 flex flex-col gap-2 flex-1 mt-4 overflow-y-auto">
-          <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-            Módulos
-          </p>
-          
+          <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Módulos</p>
           {menu.map(({ name, path, icon: Icon }) => (
             <NavLink
-              key={path}
-              to={path}
-              end={path === "/"}
+              key={path} to={path} end={path === "/"}
               className={({ isActive }) =>
                 `flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 ${
                   isActive
@@ -77,7 +51,6 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* BOTÓN DE CERRAR SESIÓN */}
         <div className="p-5 border-t border-white/5">
           <button
             onClick={handleLogout}
@@ -89,7 +62,6 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <main className="ml-72 flex-1 p-8 lg:p-12">
         <Outlet />
       </main>
