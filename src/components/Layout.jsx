@@ -33,19 +33,8 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* INDICADOR DE SISTEMA EN LÍNEA (Justo debajo del logo) */}
-        <div className="px-5 mt-4">
-          <div className="flex items-center justify-center gap-2 px-3 py-2.5 bg-brand-green/10 rounded-xl border border-brand-green/20 shadow-[0_0_15px_rgba(21,128,61,0.2)]">
-            <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-green"></span>
-            </div>
-            <span className="text-xs font-bold text-brand-green tracking-wide">SISTEMA EN LÍNEA</span>
-          </div>
-        </div>
-
         {/* MENÚ DE NAVEGACIÓN */}
-        <nav className="p-5 flex flex-col gap-2 flex-1 mt-2 overflow-y-auto">
+        <nav className="p-5 flex flex-col gap-2 flex-1 mt-4 overflow-y-auto">
           <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Módulos</p>
           {menu.map(({ name, path, icon: Icon }) => (
             <NavLink
@@ -64,8 +53,19 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* BOTÓN CERRAR SESIÓN */}
-        <div className="p-5 border-t border-white/5">
+        {/* INDICADOR DE SISTEMA EN LÍNEA Y BOTÓN DE CERRAR SESIÓN */}
+        <div className="p-5 border-t border-white/5 flex flex-col gap-4">
+          
+          {/* AQUÍ ESTÁ EL INDICADOR */}
+          <div className="flex items-center justify-center gap-2 px-3 py-2.5 bg-brand-green/10 rounded-xl border border-brand-green/20 shadow-[0_0_15px_rgba(21,128,61,0.2)]">
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-green"></span>
+            </div>
+            <span className="text-xs font-bold text-brand-green tracking-wide">SISTEMA EN LÍNEA</span>
+          </div>
+
+          {/* BOTÓN CERRAR SESIÓN */}
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-white/5 text-gray-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 border border-transparent transition-all duration-300"
@@ -73,6 +73,7 @@ export default function Layout() {
             <LogOut size={20} />
             <span className="font-medium">Cerrar Sesión</span>
           </button>
+
         </div>
       </aside>
 
