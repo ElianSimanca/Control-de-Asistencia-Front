@@ -8,7 +8,7 @@ import {
   Modal,
   Chip,
   useOverlayState,
-  addToast, // IMPORTAMOS EL TOAST
+  addToast,
 } from "@heroui/react";
 import { Plus, UserCheck, UserX, Clock, Search } from "lucide-react";
 
@@ -65,6 +65,20 @@ export default function EmpleadosPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validar si el documento ya existe (Solo si no estamos editando)
+    if (!editando) {
+      const existe = empleados.find((emp) => emp.documento === documento);
+      if (existe) {
+        addToast({
+          title: "Documento duplicado",
+          description: "Ya existe un empleado con este número de documento.",
+          color: "warning",
+        });
+        return; // Detenemos el guardado
+      }
+    }
+
     try {
       const response = await api.post("/empleados", {
         nombre,
@@ -78,7 +92,6 @@ export default function EmpleadosPage() {
       }
       cerrarModal();
       await cargarDatos();
-      // NOTIFICACIÓN DE ÉXITO
       addToast({
         title: "Empleado registrado",
         description: "El empleado se guardó correctamente.",
@@ -86,7 +99,6 @@ export default function EmpleadosPage() {
       });
     } catch (err) {
       console.error("Error al guardar empleado:", err);
-      // NOTIFICACIÓN DE ERROR
       addToast({
         title: "Error al guardar",
         description: "No se pudo registrar el empleado.",
@@ -139,7 +151,7 @@ export default function EmpleadosPage() {
       await cargarDatos();
       addToast({
         title: "Estado cambiado",
-        description: "El estado del empleado se modificó correctamente.",
+        description: "El estado del empleado se modificó.",
         color: "success",
       });
     } catch (err) {
