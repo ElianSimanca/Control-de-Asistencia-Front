@@ -5,7 +5,7 @@ import {
   Label,
   Modal,
   Chip,
-  addToast, // IMPORTAMOS EL TOAST
+  toast, // <-- IMPORTACIÓN CORREGIDA
 } from "@heroui/react";
 import { Search, Link as LinkIcon, Unlink, Trash2, ShieldAlert, ShieldCheck } from "lucide-react";
 
@@ -47,41 +47,23 @@ export default function TarjetasPage() {
   const asignarTarjeta = async (e) => {
     e.preventDefault();
     if (!tarjetaSeleccionada || !empleadoId) {
-      addToast({
-        title: "Atención",
-        description: "Seleccione un empleado.",
-        color: "warning",
-      });
+      toast.warning("Atención", { description: "Seleccione un empleado." });
       return;
     }
 
     try {
-      await api.put(`/cards/${tarjetaSeleccionada.id}/assign`, {
-        empleadoId: Number(empleadoId),
-      });
+      await api.put(`/cards/${tarjetaSeleccionada.id}/assign`, { empleadoId: Number(empleadoId) });
       setTarjetaSeleccionada(null);
       setEmpleadoId("");
       setIsOpen(false);
       await cargarDatos();
-      addToast({
-        title: "Tarjeta asignada",
-        description: "La tarjeta se vinculó al empleado correctamente.",
-        color: "success",
-      });
+      toast.success("Tarjeta asignada", { description: "La tarjeta se vinculó al empleado correctamente." });
     } catch (err) {
       console.error("Error al asignar tarjeta:", err);
       if (err.response?.status === 409) {
-        addToast({
-          title: "Conflicto",
-          description: "El empleado ya tiene una tarjeta asignada.",
-          color: "warning",
-        });
+        toast.warning("Conflicto", { description: "El empleado ya tiene una tarjeta asignada." });
       } else {
-        addToast({
-          title: "Error",
-          description: "No se pudo asignar la tarjeta.",
-          color: "danger",
-        });
+        toast.danger("Error", { description: "No se pudo asignar la tarjeta." });
       }
     }
   };
@@ -89,73 +71,43 @@ export default function TarjetasPage() {
   const desasignarTarjeta = async (tarjeta) => {
     const confirmar = window.confirm(`¿Desasignar la tarjeta ${tarjeta.uid}?`);
     if (!confirmar) return;
-
     try {
       await api.put(`/cards/${tarjeta.id}/unassign`);
       await cargarDatos();
-      addToast({
-        title: "Tarjeta desasignada",
-        description: "La tarjeta ha quedado libre.",
-        color: "success",
-      });
+      toast.success("Tarjeta desasignada", { description: "La tarjeta ha quedado libre." });
     } catch (err) {
       console.error("Error al desasignar:", err);
-      addToast({
-        title: "Error",
-        description: "No se pudo desasignar la tarjeta.",
-        color: "danger",
-      });
+      toast.danger("Error", { description: "No se pudo desasignar la tarjeta." });
     }
   };
 
   const cambiarEstado = async (tarjeta) => {
     try {
-      const endpoint = tarjeta.activa
-        ? `/cards/${tarjeta.id}/deactivate`
-        : `/cards/${tarjeta.id}/activate`;
+      const endpoint = tarjeta.activa ? `/cards/${tarjeta.id}/deactivate` : `/cards/${tarjeta.id}/activate`;
       await api.put(endpoint);
       await cargarDatos();
-      addToast({
-        title: "Estado actualizado",
-        description: "El estado de la tarjeta ha cambiado.",
-        color: "success",
-      });
+      toast.success("Estado actualizado", { description: "El estado de la tarjeta ha cambiado." });
     } catch (err) {
       console.error("Error al cambiar estado:", err);
-      addToast({
-        title: "Error",
-        description: "No se pudo cambiar el estado.",
-        color: "danger",
-      });
+      toast.danger("Error", { description: "No se pudo cambiar el estado." });
     }
   };
 
   const eliminarTarjeta = async (tarjeta) => {
     const confirmar = window.confirm(`¿Eliminar la tarjeta ${tarjeta.uid}?`);
     if (!confirmar) return;
-
     try {
       await api.delete(`/cards/${tarjeta.id}`);
       await cargarDatos();
-      addToast({
-        title: "Tarjeta eliminada",
-        description: "La tarjeta se borró del sistema.",
-        color: "success",
-      });
+      toast.success("Tarjeta eliminada", { description: "La tarjeta se borró del sistema." });
     } catch (err) {
       console.error("Error al eliminar:", err);
-      addToast({
-        title: "Error",
-        description: "No se pudo eliminar la tarjeta.",
-        color: "danger",
-      });
+      toast.danger("Error", { description: "No se pudo eliminar la tarjeta." });
     }
   };
 
   const tarjetasFiltradas = tarjetas.filter(
-    (t) =>
-      t.uid?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      t.empleado?.nombre?.toLowerCase().includes(busqueda.toLowerCase())
+    (t) => t.uid?.toLowerCase().includes(busqueda.toLowerCase()) || t.empleado?.nombre?.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -170,13 +122,7 @@ export default function TarjetasPage() {
       <div className="glass-panel p-4 mb-6">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
-          <input
-            type="text"
-            placeholder="Buscar por UID o nombre de empleado..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all"
-          />
+          <input type="text" placeholder="Buscar por UID o nombre de empleado..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all" />
         </div>
       </div>
 
@@ -201,27 +147,19 @@ export default function TarjetasPage() {
                 tarjetasFiltradas.map((tarjeta) => (
                   <tr key={tarjeta.id} className="hover:bg-white/5 transition-colors group">
                     <td className="p-4">
-                      <span className="font-mono text-white font-medium tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">
-                        {tarjeta.uid}
-                      </span>
+                      <span className="font-mono text-white font-medium tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/10">{tarjeta.uid}</span>
                     </td>
                     <td className="p-4">
                       {tarjeta.empleado?.nombre ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-brand-blue/20 flex items-center justify-center text-blue-300 font-bold border border-brand-blue/30 text-xs">
-                            {tarjeta.empleado.nombre.charAt(0)}
-                          </div>
+                          <div className="w-6 h-6 rounded-full bg-brand-blue/20 flex items-center justify-center text-blue-300 font-bold border border-brand-blue/30 text-xs">{tarjeta.empleado.nombre.charAt(0)}</div>
                           <span className="text-gray-300">{tarjeta.empleado.nombre}</span>
                         </div>
                       ) : (
-                        <span className="text-yellow-500/70 text-sm flex items-center gap-1">
-                          <Unlink size={14} /> Sin asignar
-                        </span>
+                        <span className="text-yellow-500/70 text-sm flex items-center gap-1"><Unlink size={14} /> Sin asignar</span>
                       )}
                     </td>
-                    <td className="p-4">
-                      <span className="text-gray-400 font-mono">{tarjeta.empleado?.documento || "-"}</span>
-                    </td>
+                    <td className="p-4"><span className="text-gray-400 font-mono">{tarjeta.empleado?.documento || "-"}</span></td>
                     <td className="p-4">
                       <Chip size="sm" variant="flat" className={tarjeta.activa ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}>
                         {tarjeta.activa ? "Activa" : "Inactiva"}
@@ -230,22 +168,16 @@ export default function TarjetasPage() {
                     <td className="p-4">
                       <div className="flex gap-2 flex-wrap">
                         {!tarjeta.empleado && (
-                          <Button size="sm" className="bg-brand-blue/10 hover:bg-brand-blue/20 text-blue-400 border border-brand-blue/20 transition-all" onPress={() => abrirAsignacion(tarjeta)}>
-                            <LinkIcon size={14} className="mr-1" /> Asignar
-                          </Button>
+                          <Button size="sm" className="bg-brand-blue/10 hover:bg-brand-blue/20 text-blue-400 border border-brand-blue/20 transition-all" onPress={() => abrirAsignacion(tarjeta)}><LinkIcon size={14} className="mr-1" /> Asignar</Button>
                         )}
                         {tarjeta.empleado && (
-                          <Button size="sm" className="bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all" onPress={() => desasignarTarjeta(tarjeta)}>
-                            <Unlink size={14} className="mr-1" /> Desasignar
-                          </Button>
+                          <Button size="sm" className="bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all" onPress={() => desasignarTarjeta(tarjeta)}><Unlink size={14} className="mr-1" /> Desasignar</Button>
                         )}
                         <Button size="sm" className={tarjeta.activa ? "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 transition-all" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition-all"} onPress={() => cambiarEstado(tarjeta)}>
                           {tarjeta.activa ? <ShieldAlert size={14} className="mr-1" /> : <ShieldCheck size={14} className="mr-1" />}
                           {tarjeta.activa ? "Desactivar" : "Activar"}
                         </Button>
-                        <Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarTarjeta(tarjeta)}>
-                          <Trash2 size={14} />
-                        </Button>
+                        <Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarTarjeta(tarjeta)}><Trash2 size={14} /></Button>
                       </div>
                     </td>
                   </tr>
@@ -262,9 +194,7 @@ export default function TarjetasPage() {
             <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
               {({ close }) => (
                 <form onSubmit={asignarTarjeta}>
-                  <Modal.Header>
-                    <Modal.Heading className="text-white text-xl font-bold">Asignar Tarjeta RFID</Modal.Heading>
-                  </Modal.Header>
+                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">Asignar Tarjeta RFID</Modal.Heading></Modal.Header>
                   <Modal.Body className="flex flex-col gap-4 py-6">
                     {tarjetaSeleccionada && (
                       <div className="p-4 rounded-xl bg-white/5 border border-white/10">
