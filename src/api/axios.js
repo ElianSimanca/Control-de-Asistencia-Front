@@ -20,10 +20,9 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Manejo de Sesión Expirada (401)
+    // Si el token expiró (401), cerramos la sesión
     if (error.response && error.response.status === 401) {
       sessionStorage.removeItem('token');
-      // Redirigir al login si el token expira
       window.location.href = '/login';
     }
     return Promise.reject(error);
