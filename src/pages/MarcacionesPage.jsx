@@ -9,26 +9,39 @@ export default function MarcacionesPage() {
 
   const cargarMarcaciones = async () => {
     try {
-      setLoading(true);
-
+      // Nota: Quitamos setLoading(true) aquí para evitar que la tabla 
+      // parpadee o desaparezca cada 5 segundos cuando se auto-actualice.
       const response = await api.get("/marcaciones");
-
       setMarcaciones(response.data);
     } catch (err) {
       console.error("Error al obtener marcaciones:", err);
+      // Si el error es por sesión expirada (401), podrías redirigir al login
+      if (err.response?.status === 401) {
+        console.warn("Sesión expirada. Por favor vuelve a iniciar sesión.");
+        // localStorage.removeItem("token");
+        // window.location.href = "/login";
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // 1. Carga inicial al entrar a la página
     cargarMarcaciones();
+
+    // 2. AUTO-ACTUALIZACIÓN (Polling): Consultar al backend cada 5 segundos
+    const intervalo = setInterval(() => {
+      cargarMarcaciones();
+    }, 5000);
+
+    // 3. Limpiar el intervalo cuando el usuario cambie de página
+    return () => clearInterval(intervalo);
   }, []);
 
   // =========================
   // FECHA ACTUAL
   // =========================
-
   const hoy = new Date();
 
   const diaHoy = hoy.toLocaleDateString("es-CO", {
@@ -44,7 +57,6 @@ export default function MarcacionesPage() {
   // =========================
   // FILTRAR MARCACIONES DE HOY
   // =========================
-
   const marcacionesHoy = marcaciones.filter((marcacion) => {
     const fecha = new Date(marcacion.fechaHora);
 
@@ -57,65 +69,31 @@ export default function MarcacionesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-
       <div className="flex justify-between items-center mb-6">
-
         <div>
-          <h1 className="text-2xl font-bold">
-            Registro de Marcaciones
-          </h1>
-
-          <p className="text-gray-500">
-            Entradas y salidas de los empleados
-          </p>
-
+          <h1 className="text-2xl font-bold">Registro de Marcaciones</h1>
+          <p className="text-gray-500">Entradas y salidas de los empleados</p>
           <p className="mt-2 text-lg font-semibold capitalize">
             {diaHoy}, {fechaHoy}
           </p>
         </div>
 
-        <Button
-          color="primary"
-          onPress={cargarMarcaciones}
-        >
+        <Button color="primary" onPress={cargarMarcaciones}>
           <RefreshCw size={18} />
           Actualizar
         </Button>
-
       </div>
 
       <Table>
         <Table.ScrollContainer>
-
           <Table.Content aria-label="Tabla de marcaciones">
-
             <Table.Header>
-
-
-              <Table.Column isRowHeader>
-                EMPLEADO
-              </Table.Column>
-
-              <Table.Column>
-                DOCUMENTO
-              </Table.Column>
-
-              <Table.Column>
-                FECHA
-              </Table.Column>
-
-              <Table.Column>
-                HORA
-              </Table.Column>
-
-              <Table.Column>
-                TIPO
-              </Table.Column>
-
-              <Table.Column>
-                RETRASO
-              </Table.Column>
-
+              <Table.Column isRowHeader>EMPLEADO</Table.Column>
+              <Table.Column>DOCUMENTO</Table.Column>
+              <Table.Column>FECHA</Table.Column>
+              <Table.Column>HORA</Table.Column>
+              <Table.Column>TIPO</Table.Column>
+              <Table.Column>RETRASO</Table.Column>
             </Table.Header>
 
             <Table.Body
@@ -126,78 +104,48 @@ export default function MarcacionesPage() {
                   : "No hay marcaciones registradas hoy."
               }
             >
-
               {(marcacion) => {
-
-                const fecha =
-                  new Date(marcacion.fechaHora);
+                const fecha = new Date(marcacion.fechaHora);
 
                 return (
-
                   <Table.Row id={marcacion.id}>
-
                     <Table.Cell>
-                      {marcacion.empleado?.nombre ||
-                        "Sin empleado"}
+                      {marcacion.empleado?.nombre || "Sin empleado"}
                     </Table.Cell>
-
                     <Table.Cell>
-                      {marcacion.empleado?.documento ||
-                        "-"}
+                      {marcacion.empleado?.documento || "-"}
                     </Table.Cell>
-
                     <Table.Cell>
                       {fecha.toLocaleDateString("es-CO")}
                     </Table.Cell>
-
                     <Table.Cell>
                       {fecha.toLocaleTimeString("es-CO")}
                     </Table.Cell>
-
                     <Table.Cell>
-
                       <Chip
                         color={
-                          marcacion.tipo === "ENTRADA"
-                            ? "success"
-                            : "warning"
+                          marcacion.tipo === "ENTRADA" ? "success" : "warning"
                         }
                       >
                         {marcacion.tipo}
                       </Chip>
-
                     </Table.Cell>
-
                     <Table.Cell>
-
                       {marcacion.minutosRetraso > 0 ? (
-
                         <Chip color="danger">
                           {marcacion.minutosRetraso} min
                         </Chip>
-
                       ) : (
-
-                        <Chip color="success">
-                          Sin retraso
-                        </Chip>
-
+                        <Chip color="success">Sin retraso</Chip>
                       )}
-
                     </Table.Cell>
-
                   </Table.Row>
-
                 );
               }}
-
             </Table.Body>
-
           </Table.Content>
-
         </Table.ScrollContainer>
       </Table>
-
     </div>
   );
 }
