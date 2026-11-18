@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Users, CreditCard, ClipboardCheck, Clock, LogOut, Server
+  LayoutDashboard, Users, CreditCard, ClipboardCheck, Clock, LogOut
 } from "lucide-react";
 
 const menu = [
@@ -24,7 +24,7 @@ export default function Layout() {
     <div className="min-h-screen flex">
       <aside className="glass-panel w-72 fixed h-screen flex flex-col z-50 rounded-none md:rounded-r-3xl border-l-0 border-t-0 border-b-0">
         
-        {/* LOGO Y TÍTULO */}
+        {/* 1. LOGO Y TÍTULO */}
         <div className="p-8 border-b border-white/5 flex items-center gap-4">
           <img src="/logo.png" alt="El Entonador Ferretero" className="w-14 h-14 object-contain bg-white rounded-xl p-1.5 shadow-xl" />
           <div>
@@ -33,8 +33,19 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* MENÚ DE NAVEGACIÓN */}
-        <nav className="p-5 flex flex-col gap-2 flex-1 mt-4 overflow-y-auto">
+        {/* 2. INDICADOR DE SISTEMA EN LÍNEA (Movido aquí arriba para que siempre se vea) */}
+        <div className="px-5 pt-4 pb-2">
+          <div className="flex items-center justify-center gap-2 px-3 py-2 bg-brand-green/10 rounded-xl border border-brand-green/20 shadow-[0_0_10px_rgba(21,128,61,0.3)]">
+            <div className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-green"></span>
+            </div>
+            <span className="text-xs font-bold text-brand-green tracking-wide">SISTEMA EN LÍNEA</span>
+          </div>
+        </div>
+
+        {/* 3. MENÚ DE NAVEGACIÓN */}
+        <nav className="px-5 flex flex-col gap-2 flex-1 mt-2 overflow-y-auto">
           <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Módulos</p>
           {menu.map(({ name, path, icon: Icon }) => (
             <NavLink
@@ -53,19 +64,8 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* INDICADOR DE SISTEMA EN LÍNEA Y BOTÓN DE CERRAR SESIÓN */}
-        <div className="p-5 border-t border-white/5 flex flex-col gap-4">
-          
-          {/* AQUÍ ESTÁ EL INDICADOR */}
-          <div className="flex items-center justify-center gap-2 px-3 py-2.5 bg-brand-green/10 rounded-xl border border-brand-green/20 shadow-[0_0_15px_rgba(21,128,61,0.2)]">
-            <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-green"></span>
-            </div>
-            <span className="text-xs font-bold text-brand-green tracking-wide">SISTEMA EN LÍNEA</span>
-          </div>
-
-          {/* BOTÓN CERRAR SESIÓN */}
+        {/* 4. BOTÓN CERRAR SESIÓN */}
+        <div className="p-5 border-t border-white/5">
           <button
             onClick={handleLogout}
             className="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl bg-white/5 text-gray-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 border border-transparent transition-all duration-300"
@@ -73,10 +73,10 @@ export default function Layout() {
             <LogOut size={20} />
             <span className="font-medium">Cerrar Sesión</span>
           </button>
-
         </div>
       </aside>
 
+      {/* CONTENIDO PRINCIPAL */}
       <main className="ml-72 flex-1 p-8 lg:p-12">
         <Outlet />
       </main>
