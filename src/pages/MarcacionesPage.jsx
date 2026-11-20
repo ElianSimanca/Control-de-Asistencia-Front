@@ -6,7 +6,7 @@ import { RefreshCw, Loader2, PlusCircle } from "lucide-react";
 export default function MarcacionesPage() {
   const [marcaciones, setMarcaciones] = useState([]);
   const [empleados, setEmpleados] = useState([]);
-  const [tarjetas, setTarjetas] = useState([]); // <-- NUEVO ESTADO
+  const [tarjetas, setTarjetas] = useState([]); 
   const [loading, setLoading] = useState(true);
 
   // Estados para el modal de marcación manual
@@ -16,11 +16,11 @@ export default function MarcacionesPage() {
 
   const cargarDatos = async () => {
     try {
-      // Hacemos las 3 peticiones al mismo tiempo
+      // Hacemos las peticiones al mismo tiempo, usando /cards según tu backend
       const [resMarcaciones, resEmpleados, resTarjetas] = await Promise.all([
         api.get("/marcaciones"),
         api.get("/empleados"),
-        api.get("/tarjetas").catch(() => ({ data: [] })) // Si falla, devuelve array vacío para no romper
+        api.get("/cards").catch(() => ({ data: [] })) // Evita romper si falla
       ]);
       setMarcaciones(resMarcaciones.data);
       setEmpleados(resEmpleados.data);
@@ -53,7 +53,6 @@ export default function MarcacionesPage() {
     toast.default("Sincronizando", { description: "Consultando los datos más recientes..." });
   };
 
-  // Función para guardar la marcación manual
   const handleMarcacionManual = async (e) => {
     e.preventDefault();
     if (!empleadoId) {
@@ -64,21 +63,20 @@ export default function MarcacionesPage() {
     try {
       setGuardando(true);
       
-      // 1. Buscar la tarjeta que pertenezca a este empleado
-      // Nota: Revisa si en la entidad Tarjeta la propiedad se llama 'empleado' o 'empleadoId'
+      // 1. Buscar la tarjeta que pertenezca al empleado seleccionado
       const tarjetaDelEmpleado = tarjetas.find(t => {
-          // A veces el backend devuelve el objeto empleado completo, a veces solo el ID
-          const idTarjeta = t.empleado?.id || t.empleadoId; 
-          return idTarjeta === Number(empleadoId);
+          // Validamos si el backend envía el objeto empleado completo o solo el ID
+          const idDelEmpleadoEnTarjeta = t.empleado?.id || t.empleadoId; 
+          return idDelEmpleadoEnTarjeta === Number(empleadoId);
       });
 
       if (!tarjetaDelEmpleado) {
-        toast.danger("Error", { description: "Este empleado no tiene una tarjeta asignada en el sistema." });
+        toast.danger("Error", { description: "Este empleado no tiene una tarjeta asignada." });
         setGuardando(false);
         return;
       }
 
-      // 2. Enviamos el UID al endpoint de tu compañero
+      // 2. Enviamos el UID de la tarjeta al endpoint de tu compañero
       await api.post("/marcaciones", {
         uid: tarjetaDelEmpleado.uid 
       });
