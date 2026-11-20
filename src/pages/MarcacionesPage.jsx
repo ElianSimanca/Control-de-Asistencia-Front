@@ -9,7 +9,6 @@ export default function MarcacionesPage() {
   const [tarjetas, setTarjetas] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  // Estados para el modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [empleadoId, setEmpleadoId] = useState("");
   const [tipo, setTipo] = useState("ENTRADA");
@@ -44,20 +43,16 @@ export default function MarcacionesPage() {
   const diaHoy = hoy.toLocaleDateString("es-CO", { weekday: "long" });
   const fechaHoy = hoy.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
 
-  const marcacionesHoy = marcaciones.filter((m) => {
-    const fecha = new Date(m.fechaHora);
-    return fecha.getFullYear() === hoy.getFullYear() && fecha.getMonth() === hoy.getMonth() && fecha.getDate() === hoy.getDate();
-  });
+  // --- AQUÍ MOSTRAMOS TODAS LAS MARCACIONES ---
+  const todasLasMarcaciones = [...marcaciones].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
   const handleSincronizar = () => {
     cargarDatos();
     toast.default("Sincronizando", { description: "Consultando los datos más recientes..." });
   };
 
-  // Abrir modal con la fecha/hora actual por defecto
   const abrirModal = () => {
     const ahora = new Date();
-    // Ajuste para que el input datetime-local muestre la hora correcta
     ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
     setFechaHora(ahora.toISOString().slice(0, 16)); 
     setIsModalOpen(true);
@@ -84,7 +79,6 @@ export default function MarcacionesPage() {
         return;
       }
 
-      // Convertimos la fecha local del input a formato ISO
       const fechaIso = new Date(fechaHora).toISOString();
 
       await api.post("/marcaciones", {
@@ -110,7 +104,7 @@ export default function MarcacionesPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Registro de Marcaciones</h1>
-          <p className="text-gray-400 mt-2 text-lg">Entradas y salidas en tiempo real</p>
+          <p className="text-gray-400 mt-2 text-lg">Historial de entradas y salidas</p>
           <p className="mt-3 text-lg font-semibold capitalize text-brand-green">{diaHoy}, {fechaHoy}</p>
         </div>
         
@@ -132,32 +126,35 @@ export default function MarcacionesPage() {
               <tr className="border-b border-white/10">
                 <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Empleado</th>
                 <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Documento</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Fecha</th>
                 <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Hora</th>
                 <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Tipo</th>
                 <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Estado</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {marcacionesHoy.length === 0 && (
+              {todasLasMarcaciones.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center">
+                  <td colSpan={6} className="p-12 text-center">
                     {loading ? (
                       <div className="flex flex-col items-center justify-center gap-3">
                         <Loader2 className="animate-spin text-brand-green" size={32} />
                         <p className="text-gray-300 font-medium">Consultando el servidor...</p>
                       </div>
                     ) : (
-                      <p className="text-gray-400">No hay marcaciones registradas hoy.</p>
+                      <p className="text-gray-400">No hay marcaciones registradas en el sistema.</p>
                     )}
                   </td>
                 </tr>
               )}
-              {marcacionesHoy.map((m) => {
+              {todasLasMarcaciones.map((m) => {
                 const fecha = new Date(m.fechaHora);
                 return (
                   <tr key={m.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4 font-medium text-white">{m.empleado?.nombre || "Sin empleado"}</td>
                     <td className="p-4 text-gray-400 font-mono">{m.empleado?.documento || "-"}</td>
+                    {/* NUEVA COLUMNA DE FECHA */}
+                    <td className="p-4 text-gray-300 font-mono text-sm">{fecha.toLocaleDateString("es-CO")}</td>
                     <td className="p-4 text-gray-300 font-mono">{fecha.toLocaleTimeString("es-CO")}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}`}>
