@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, CreditCard, ClipboardCheck, Clock, LogOut
 } from "lucide-react";
+import api from "../api/axios"; // Asegúrate de que esta ruta sea la correcta
 
 const menu = [
   { name: "Inicio", path: "/", icon: LayoutDashboard },
@@ -13,6 +15,23 @@ const menu = [
 
 export default function Layout() {
   const navigate = useNavigate();
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
+
+  // Verificación real del servidor cada 10 segundos
+  useEffect(() => {
+    const verificarConexion = async () => {
+      try {
+        await api.get("/health");
+        setIsBackendOnline(true);
+      } catch (err) {
+        setIsBackendOnline(false);
+      }
+    };
+
+    verificarConexion();
+    const intervalo = setInterval(verificarConexion, 10000);
+    return () => clearInterval(intervalo);
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");
@@ -33,13 +52,21 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* 2. INDICADOR DE SISTEMA EN LÍNEA */}
-        <div className="mx-5 mt-4 mb-2 p-3 bg-brand-green rounded-xl shadow-lg shadow-brand-green/50 flex items-center justify-center gap-2">
+        {/* 2. INDICADOR DE SISTEMA DINÁMICO */}
+        <div className={`mx-5 mt-4 mb-2 p-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all duration-300 ${
+          isBackendOnline 
+            ? "bg-green-500 shadow-green-500/50" 
+            : "bg-red-500 shadow-red-500/50"
+        }`}>
           <div className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            {isBackendOnline && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            )}
             <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
           </div>
-          <span className="text-xs font-bold text-white tracking-wider">SISTEMA EN LÍNEA</span>
+          <span className="text-xs font-bold text-white tracking-wider">
+            {isBackendOnline ? "SISTEMA EN LÍNEA" : "SISTEMA FUERA DE LÍNEA"}
+          </span>
         </div>
 
         {/* 3. MENÚ DE NAVEGACIÓN */}
