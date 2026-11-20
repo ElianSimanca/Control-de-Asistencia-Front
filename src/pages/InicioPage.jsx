@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Users, UserCheck, UserX, Clock, ClipboardCheck, LogIn, LogOut } from "lucide-react";
+import { Users, UserCheck, UserX, Clock, ClipboardCheck, LogIn, LogOut, Download } from "lucide-react";
+import { toast } from "@heroui/react";
+import * as XLSX from "xlsx";
 
 export default function InicioPage() {
   const [empleados, setEmpleados] = useState([]);
   const [marcaciones, setMarcaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Filtros de fecha para exportar
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
 
   const cargarDatos = async () => {
     try {
@@ -32,10 +38,7 @@ export default function InicioPage() {
   const diaHoy = hoy.toLocaleDateString("es-CO", { weekday: "long" });
   const fechaHoy = hoy.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
 
-  // --- AQUÍ ESTABA EL FILTRO, AHORA USAMOS TODAS LAS MARCACIONES ---
   const empleadosActivos = empleados.filter((e) => e.activo);
-  
-  // Para los KPIs de "Presentes" y "Ausentes", sí necesitamos filtrar solo las de hoy
   const marcacionesHoy = marcaciones.filter((m) => {
     const fecha = new Date(m.fechaHora);
     return fecha.getFullYear() === hoy.getFullYear() && fecha.getMonth() === hoy.getMonth() && fecha.getDate() === hoy.getDate();
@@ -46,7 +49,6 @@ export default function InicioPage() {
   const ausentes = Math.max(empleadosActivos.length - presentes, 0);
   const retrasos = marcacionesHoy.filter((m) => m.minutosRetraso > 0).length;
   
-  // Mostramos las últimas 8 marcaciones del historial completo
   const ultimasMarcaciones = [...marcaciones].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)).slice(0, 8);
 
   const kpis = [
@@ -56,14 +58,71 @@ export default function InicioPage() {
     { title: "Retrasos", value: retrasos, icon: <Clock size={28} className="text-brand-yellow" />, bg: "bg-brand-yellow/10" },
   ];
 
+  // --- FUNCIÓN PARA EXPORTAR A EXCEL ---
+  const handleExportar = () => {
+    let datosParaExportar = marcaciones;
+
+    if (fechaInicio || fechaFin) {
+      datosParaExportar = marcaciones.filter(m => {
+        const fechaM = new Date(m.fechaHora).getTime();
+        const inicio = fechaInicio ? new Date(fechaInicio + "T00:00:00").getTime() : 0;
+        const fin = fechaFin ? new Date(fechaFin + "T23:59:59").getTime() : Infinity;
+        return fechaM >= inicio && fechaM <= fin;
+      });
+    }
+
+    if (datosParaExportar.length === 0) {
+      toast.warning("Sin datos", { description: "No hay marcaciones en ese rango de fechas." });
+      return;
+    }
+
+    const datosExcel = datosParaExportar.map(m => {
+      const fecha = new Date(m.fechaHora);
+      return {
+        "Empleado": m.empleado?.nombre || "Sin empleado",
+        "Documento": m.empleado?.documento || "-",
+        "Fecha": fecha.toLocaleDateString("es-CO"),
+        "Hora": fecha.toLocaleTimeString("es-CO"),
+        "Tipo": m.tipo,
+        "Estado": m.minutosRetraso > 0 ? `${m.minutosRetraso} min tarde` : "A tiempo"
+      };
+    });
+
+    const hoja = XLSX.utils.json_to_sheet(datosExcel);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Marcaciones");
+    
+    XLSX.writeFile(libro, `Reporte_Asistencia_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast.success("Excel generado", { description: "El archivo se ha descargado." });
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
-        <p className="text-gray-400 mt-1 text-lg">Resumen del control de asistencia</p>
-        <div className="glass-panel px-4 py-2 mt-4 inline-flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></div>
-          <p className="text-sm font-medium text-gray-300 capitalize">{diaHoy}, <span className="text-white">{fechaHoy}</span></p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
+            <p className="text-gray-400 mt-1 text-lg">Resumen del control de asistencia</p>
+            <div className="glass-panel px-4 py-2 mt-4 inline-flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></div>
+              <p className="text-sm font-medium text-gray-300 capitalize">{diaHoy}, <span className="text-white">{fechaHoy}</span></p>
+            </div>
+          </div>
+          
+          {/* FILTROS DE EXPORTACIÓN */}
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-400 mb-1">Desde</label>
+              <input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-blue/50 [color-scheme:dark]" />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-xs text-gray-400 mb-1">Hasta</label>
+              <input type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-blue/50 [color-scheme:dark]" />
+            </div>
+            <button onClick={handleExportar} className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg shadow-green-600/20 transition-all h-[42px]">
+              <Download size={18} /> Exportar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -109,7 +168,6 @@ export default function InicioPage() {
                       <div><p className="font-semibold text-white">{m.empleado?.nombre || "Sin empleado"}</p><p className="text-sm text-gray-400">Doc: {m.empleado?.documento || "-"}</p></div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {/* Agregamos la fecha y la hora */}
                       <div className="text-right">
                         <p className="font-mono text-gray-300 bg-black/20 px-3 py-1 rounded-md text-sm border border-white/5">{fecha.toLocaleTimeString("es-CO")}</p>
                         <p className="text-xs text-gray-500 mt-1">{fecha.toLocaleDateString("es-CO")}</p>
