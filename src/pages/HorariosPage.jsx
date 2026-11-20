@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import {
-  Button,
-  Input,
-  TextField,
-  Label,
-  Modal,
-  Chip,
-  toast, // <-- CORREGIDO
-} from "@heroui/react";
+import { Chip, toast } from "@heroui/react";
 import { Plus, RefreshCw, Clock, Trash2 } from "lucide-react";
 
 export default function HorariosPage() {
@@ -66,8 +58,7 @@ export default function HorariosPage() {
       if (err.response && err.response.status === 409) {
         toast.warning("No se puede eliminar", { description: err.response.data });
       } else {
-        console.error("Error al eliminar el horario:", err);
-        toast.danger("Error", { description: "Ocurrió un error inesperado al eliminar." });
+        toast.danger("Error", { description: "Ocurrió un error inesperado." });
       }
     }
   };
@@ -85,8 +76,8 @@ export default function HorariosPage() {
           <p className="text-gray-400 mt-2 text-lg">Configuración de turnos y tolerancias de ingreso</p>
         </div>
         <div className="flex gap-3">
-          <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 transition-all duration-300 backdrop-blur-md" onPress={cargarHorarios}><RefreshCw size={18} className={loading ? "animate-spin" : ""} />Sincronizar</Button>
-          <Button className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20" onPress={() => setIsOpen(true)}><Plus size={18} />Nuevo Horario</Button>
+          <button onClick={cargarHorarios} className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl transition-all font-medium"><RefreshCw size={18} className={loading ? "animate-spin" : ""} />Sincronizar</button>
+          <button onClick={() => setIsOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-brand-blue/20 transition-all"><Plus size={18} />Nuevo Horario</button>
         </div>
       </div>
 
@@ -95,11 +86,11 @@ export default function HorariosPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/10">
-                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Nombre Turno</th>
-                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Hora Entrada</th>
-                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Hora Salida</th>
-                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Tolerancia</th>
-                <th className="p-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Acciones</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Nombre Turno</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Hora Entrada</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Hora Salida</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Tolerancia</th>
+                <th className="p-4 text-sm font-semibold text-gray-400 uppercase">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -109,12 +100,12 @@ export default function HorariosPage() {
                 <tr><td colSpan={5} className="p-8 text-center text-gray-400">No hay horarios configurados.</td></tr>
               ) : (
                 horarios.map((horario) => (
-                  <tr key={horario.id} className="hover:bg-white/5 transition-colors group">
+                  <tr key={horario.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4"><span className="font-medium text-white">{horario.nombre}</span></td>
                     <td className="p-4 text-gray-300 font-mono">{formatearHora(horario.horaEntrada)}</td>
                     <td className="p-4 text-gray-300 font-mono">{formatearHora(horario.horaSalida)}</td>
                     <td className="p-4"><Chip size="sm" variant="flat" className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">{horario.toleranciaMinutos} min</Chip></td>
-                    <td className="p-4"><Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarHorario(horario.id)}><Trash2 size={16} className="mr-1" />Eliminar</Button></td>
+                    <td className="p-4"><button onClick={() => eliminarHorario(horario.id)} className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-all text-sm font-medium"><Trash2 size={16} />Eliminar</button></td>
                   </tr>
                 ))
               )}
@@ -123,43 +114,26 @@ export default function HorariosPage() {
         </div>
       </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} className="backdrop-blur-sm bg-black/60">
-          <Modal.Container placement="center">
-            <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
-              {({ close }) => (
-                <form onSubmit={handleSubmit}>
-                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">Agregar Nuevo Turno</Modal.Heading></Modal.Header>
-                  <Modal.Body className="flex flex-col gap-4 py-6">
-                    <TextField isRequired>
-                      <Label className="text-gray-300 font-medium mb-1">Nombre del Turno</Label>
-                      <Input name="nombre" placeholder="Ej: Turno Mañana" value={formData.nombre} onChange={handleChange} className="bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-brand-blue/50" />
-                    </TextField>
-                    <div className="grid grid-cols-2 gap-4">
-                      <TextField isRequired>
-                        <Label className="text-gray-300 font-medium mb-1">Hora de Entrada</Label>
-                        <Input type="time" name="horaEntrada" value={formData.horaEntrada} onChange={handleChange} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
-                      </TextField>
-                      <TextField isRequired>
-                        <Label className="text-gray-300 font-medium mb-1">Hora de Salida</Label>
-                        <Input type="time" name="horaSalida" value={formData.horaSalida} onChange={handleChange} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
-                      </TextField>
-                    </div>
-                    <TextField isRequired>
-                      <Label className="text-gray-300 font-medium mb-1">Tolerancia (minutos)</Label>
-                      <Input type="number" name="toleranciaMinutos" placeholder="15" value={formData.toleranciaMinutos} onChange={handleChange} min={0} className="bg-white/5 border border-white/10 text-white focus:border-brand-blue/50" />
-                    </TextField>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button className="bg-white/5 text-white hover:bg-white/10 border border-white/10" onPress={close}>Cancelar</Button>
-                    <Button type="submit" className="bg-brand-blue hover:bg-blue-700 text-white font-semibold">{guardando ? "Guardando..." : "Guardar Horario"}</Button>
-                  </Modal.Footer>
-                </form>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}></div>
+          <div className="glass-panel bg-[#0B1120]/95 border border-white/10 w-full max-w-md relative z-10 p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-bold text-white mb-4">Agregar Nuevo Turno</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div><label className="block text-sm font-medium text-gray-300 mb-1">Nombre del Turno *</label><input required name="nombre" placeholder="Ej: Turno Mañana" value={formData.nombre} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-sm font-medium text-gray-300 mb-1">Hora Entrada *</label><input required type="time" name="horaEntrada" value={formData.horaEntrada} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50" /></div>
+                <div><label className="block text-sm font-medium text-gray-300 mb-1">Hora Salida *</label><input required type="time" name="horaSalida" value={formData.horaSalida} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-300 mb-1">Tolerancia (minutos) *</label><input required type="number" name="toleranciaMinutos" min={0} value={formData.toleranciaMinutos} onChange={handleChange} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50" /></div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all text-sm font-medium">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg shadow-brand-blue/20 transition-all text-sm">{guardando ? "Guardando..." : "Guardar Horario"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
