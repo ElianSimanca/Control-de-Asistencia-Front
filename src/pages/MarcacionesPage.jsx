@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Button, Chip, toast } from "@heroui/react"; // <-- CORREGIDO
+import { Chip, toast } from "@heroui/react";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 export default function MarcacionesPage() {
@@ -47,10 +47,9 @@ export default function MarcacionesPage() {
           <p className="text-gray-400 mt-2 text-lg">Entradas y salidas en tiempo real</p>
           <p className="mt-3 text-lg font-semibold capitalize text-brand-green">{diaHoy}, {fechaHoy}</p>
         </div>
-        <Button className="bg-white/10 text-white font-medium border border-white/10 hover:bg-white/20 backdrop-blur-md" onPress={handleSincronizar}>
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-          Sincronizar
-        </Button>
+        <button onClick={handleSincronizar} className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl transition-all font-medium">
+          <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Sincronizar
+        </button>
       </div>
 
       <div className="glass-panel overflow-hidden">
@@ -88,12 +87,8 @@ export default function MarcacionesPage() {
                     <td className="p-4 font-medium text-white">{m.empleado?.nombre || "Sin empleado"}</td>
                     <td className="p-4 text-gray-400 font-mono">{m.empleado?.documento || "-"}</td>
                     <td className="p-4 text-gray-300 font-mono">{fecha.toLocaleTimeString("es-CO")}</td>
-                    <td className="p-4">
-                      <Chip size="sm" variant="flat" className={m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}>{m.tipo}</Chip>
-                    </td>
-                    <td className="p-4">
-                      {m.minutosRetraso > 0 ? <span className="text-sm font-medium text-red-400">{m.minutosRetraso} min tarde</span> : <span className="text-sm font-medium text-green-400">A tiempo</span>}
-                    </td>
+                    <td className="p-4"><Chip size="sm" variant="flat" className={m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}>{m.tipo}</Chip></td>
+                    <td className="p-4">{m.minutosRetraso > 0 ? <span className="text-sm font-medium text-red-400">{m.minutosRetraso} min tarde</span> : <span className="text-sm font-medium text-green-400">A tiempo</span>}</td>
                   </tr>
                 );
               })}
