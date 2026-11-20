@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import {
-  Button,
   Label,
   Modal,
   Chip,
@@ -168,22 +167,38 @@ export default function TarjetasPage() {
                     <td className="p-4">
                       <div className="flex gap-2 flex-wrap">
                         {!tarjeta.empleado && (
-                          <Button color="primary" size="sm" className="font-semibold" onPress={() => abrirAsignacion(tarjeta)}>
-                            <LinkIcon size={14} className="mr-1" /> Asignar
-                          </Button>
+                          <button 
+                            onClick={() => abrirAsignacion(tarjeta)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-brand-blue/20 hover:bg-brand-blue/30 text-blue-400 rounded-lg border border-brand-blue/30 transition-all text-sm font-medium"
+                          >
+                            <LinkIcon size={14} /> Asignar
+                          </button>
                         )}
                         {tarjeta.empleado && (
-                          <Button color="default" variant="flat" size="sm" className="font-semibold text-gray-300" onPress={() => desasignarTarjeta(tarjeta)}>
-                            <Unlink size={14} className="mr-1" /> Desasignar
-                          </Button>
+                          <button 
+                            onClick={() => desasignarTarjeta(tarjeta)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg border border-white/10 transition-all text-sm font-medium"
+                          >
+                            <Unlink size={14} /> Desasignar
+                          </button>
                         )}
-                        <Button color={tarjeta.activa ? "warning" : "success"} variant="flat" size="sm" className="font-semibold" onPress={() => cambiarEstado(tarjeta)}>
-                          {tarjeta.activa ? <ShieldAlert size={14} className="mr-1" /> : <ShieldCheck size={14} className="mr-1" />}
+                        <button 
+                          onClick={() => cambiarEstado(tarjeta)}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border transition-all text-sm font-medium ${
+                            tarjeta.activa 
+                              ? "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border-yellow-500/20" 
+                              : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border-green-500/20"
+                          }`}
+                        >
+                          {tarjeta.activa ? <ShieldAlert size={14} /> : <ShieldCheck size={14} />}
                           {tarjeta.activa ? "Desactivar" : "Activar"}
-                        </Button>
-                        <Button color="danger" variant="flat" size="sm" className="font-semibold" onPress={() => eliminarTarjeta(tarjeta)}>
+                        </button>
+                        <button 
+                          onClick={() => eliminarTarjeta(tarjeta)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/20 transition-all text-sm font-medium"
+                        >
                           <Trash2 size={14} />
-                        </Button>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -194,41 +209,64 @@ export default function TarjetasPage() {
         </div>
       </div>
 
-      <Modal>
-        <Modal.Backdrop isOpen={isOpen} onOpenChange={setIsOpen} className="backdrop-blur-sm bg-black/60">
-          <Modal.Container placement="center">
-            <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
-              {({ close }) => (
-                <form onSubmit={asignarTarjeta}>
-                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">Asignar Tarjeta RFID</Modal.Heading></Modal.Header>
-                  <Modal.Body className="flex flex-col gap-4 py-6">
-                    {tarjetaSeleccionada && (
-                      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                        <p className="text-sm text-gray-400">Tarjeta detectada</p>
-                        <p className="font-mono text-xl font-bold text-white tracking-widest mt-1">{tarjetaSeleccionada.uid}</p>
-                        <p className="text-xs text-gray-500 mt-2">ID interno: {tarjetaSeleccionada.id}</p>
-                      </div>
-                    )}
-                    <div>
-                      <Label className="text-gray-300 font-medium mb-1">Empleado</Label>
-                      <select className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all" value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} required>
-                        <option value="" className="bg-[#0B1120]">Seleccione un empleado</option>
-                        {empleados.filter((empleado) => empleado.activo).map((empleado) => (
-                          <option key={empleado.id} value={empleado.id} className="bg-[#0B1120]">{empleado.nombre} - {empleado.documento}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button color="default" variant="flat" size="sm" className="font-semibold text-gray-300" onPress={close}>Cancelar</Button>
-                    <Button color="primary" type="submit" className="font-semibold">Asignar Tarjeta</Button>
-                  </Modal.Footer>
-                </form>
+      {/* MODAL NATIVO HTML */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Fondo oscuro con desenfoque */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          ></div>
+          
+          {/* Contenido del Modal */}
+          <div className="glass-panel bg-[#0B1120]/95 border border-white/10 w-full max-w-md relative z-10 p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-bold text-white mb-4">Asignar Tarjeta RFID</h2>
+            
+            <form onSubmit={asignarTarjeta} className="flex flex-col gap-4">
+              {tarjetaSeleccionada && (
+                <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                  <p className="text-sm text-gray-400">Tarjeta detectada</p>
+                  <p className="font-mono text-xl font-bold text-white tracking-widest mt-1">{tarjetaSeleccionada.uid}</p>
+                  <p className="text-xs text-gray-500 mt-2">ID interno: {tarjetaSeleccionada.id}</p>
+                </div>
               )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Empleado</label>
+                <select 
+                  className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white focus:outline-none focus:border-brand-blue/50 focus:ring-2 focus:ring-brand-blue/20 transition-all" 
+                  value={empleadoId} 
+                  onChange={(e) => setEmpleadoId(e.target.value)} 
+                  required
+                >
+                  <option value="" className="bg-[#0B1120]">Seleccione un empleado</option>
+                  {empleados.filter((empleado) => empleado.activo).map((empleado) => (
+                    <option key={empleado.id} value={empleado.id} className="bg-[#0B1120]">
+                      {empleado.nombre} - {empleado.documento}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <button 
+                  type="button" 
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all text-sm font-medium"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg shadow-brand-blue/20 transition-all text-sm"
+                >
+                  Asignar Tarjeta
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
