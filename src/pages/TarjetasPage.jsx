@@ -5,7 +5,7 @@ import {
   Label,
   Modal,
   Chip,
-  toast, // <-- IMPORTACIÓN CORREGIDA
+  toast,
 } from "@heroui/react";
 import { Search, Link as LinkIcon, Unlink, Trash2, ShieldAlert, ShieldCheck } from "lucide-react";
 
@@ -168,16 +168,22 @@ export default function TarjetasPage() {
                     <td className="p-4">
                       <div className="flex gap-2 flex-wrap">
                         {!tarjeta.empleado && (
-                          <Button size="sm" className="bg-brand-blue/10 hover:bg-brand-blue/20 text-blue-400 border border-brand-blue/20 transition-all" onPress={() => abrirAsignacion(tarjeta)}><LinkIcon size={14} className="mr-1" /> Asignar</Button>
+                          <Button color="primary" size="sm" className="font-semibold" onPress={() => abrirAsignacion(tarjeta)}>
+                            <LinkIcon size={14} className="mr-1" /> Asignar
+                          </Button>
                         )}
                         {tarjeta.empleado && (
-                          <Button size="sm" className="bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 transition-all" onPress={() => desasignarTarjeta(tarjeta)}><Unlink size={14} className="mr-1" /> Desasignar</Button>
+                          <Button color="default" variant="flat" size="sm" className="font-semibold text-gray-300" onPress={() => desasignarTarjeta(tarjeta)}>
+                            <Unlink size={14} className="mr-1" /> Desasignar
+                          </Button>
                         )}
-                        <Button size="sm" className={tarjeta.activa ? "bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 border border-yellow-500/20 transition-all" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition-all"} onPress={() => cambiarEstado(tarjeta)}>
+                        <Button color={tarjeta.activa ? "warning" : "success"} variant="flat" size="sm" className="font-semibold" onPress={() => cambiarEstado(tarjeta)}>
                           {tarjeta.activa ? <ShieldAlert size={14} className="mr-1" /> : <ShieldCheck size={14} className="mr-1" />}
                           {tarjeta.activa ? "Desactivar" : "Activar"}
                         </Button>
-                        <Button size="sm" className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all" onPress={() => eliminarTarjeta(tarjeta)}><Trash2 size={14} /></Button>
+                        <Button color="danger" variant="flat" size="sm" className="font-semibold" onPress={() => eliminarTarjeta(tarjeta)}>
+                          <Trash2 size={14} />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -214,8 +220,8 @@ export default function TarjetasPage() {
                     </div>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button type="button" className="bg-white/5 text-white hover:bg-white/10 border border-white/10" onPress={close}>Cancelar</Button>
-                    <Button type="submit" className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20">Asignar Tarjeta</Button>
+                    <Button color="default" variant="flat" size="sm" className="font-semibold text-gray-300" onPress={close}>Cancelar</Button>
+                    <Button color="primary" type="submit" className="font-semibold">Asignar Tarjeta</Button>
                   </Modal.Footer>
                 </form>
               )}
