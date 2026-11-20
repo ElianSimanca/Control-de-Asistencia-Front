@@ -45,7 +45,7 @@ export default function MarcacionesPage() {
   const diaHoy = hoy.toLocaleDateString("es-CO", { weekday: "long" });
   const fechaHoy = hoy.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
 
-  // Mostramos TODAS las marcaciones, no solo las de hoy
+  // Mostramos TODAS las marcaciones, ordenadas de la más reciente a la más antigua
   const todasLasMarcaciones = [...marcaciones].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
   const handleSincronizar = () => {
@@ -101,7 +101,7 @@ export default function MarcacionesPage() {
     }
   };
 
-  // Función simplificada para limpiar SOLO las marcaciones
+  // Función para limpiar SOLO las marcaciones
   const handleLimpiar = async () => {
     const mensaje = "¿Estás SEGURO de borrar todo el historial de marcaciones? Esta acción no se puede deshacer.";
     if (!window.confirm(mensaje)) return;
