@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import {
-  Button,
-  Input,
-  TextField,
-  Label,
-  Modal,
-  Chip,
-  useOverlayState,
-  toast, // <-- IMPORTACIÓN CORREGIDA
-} from "@heroui/react";
+import { Chip, toast } from "@heroui/react";
 import { Plus, UserCheck, UserX, Clock, Search } from "lucide-react";
 
 export default function EmpleadosPage() {
@@ -23,7 +14,7 @@ export default function EmpleadosPage() {
   const [cargo, setCargo] = useState("");
   const [horarioId, setHorarioId] = useState("");
   const [editando, setEditando] = useState(null);
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const cargarDatos = async () => {
     try {
@@ -55,12 +46,16 @@ export default function EmpleadosPage() {
 
   const abrirNuevo = () => {
     limpiarFormulario();
-    modalState.open();
+    setIsModalOpen(true);
   };
 
-  const cerrarModal = () => {
-    modalState.close();
-    limpiarFormulario();
+  const abrirEditar = (empleado) => {
+    setEditando(empleado);
+    setNombre(empleado.nombre || "");
+    setDocumento(empleado.documento || "");
+    setCargo(empleado.cargo || "");
+    setHorarioId(empleado.horario?.id ? String(empleado.horario.id) : "");
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
@@ -74,40 +69,21 @@ export default function EmpleadosPage() {
     }
 
     try {
-      const response = await api.post("/empleados", { nombre, documento, cargo, activo: true });
-      const nuevoEmpleado = response.data;
-      if (horarioId) await api.put(`/empleados/${nuevoEmpleado.id}/horario/${horarioId}`);
-      
-      cerrarModal();
+      if (editando) {
+        await api.put(`/empleados/${editando.id}`, { nombre, documento, cargo, activo: editando.activo });
+        if (horarioId) await api.put(`/empleados/${editando.id}/horario/${horarioId}`);
+        toast.success("Empleado actualizado", { description: "Los datos se guardaron correctamente." });
+      } else {
+        const response = await api.post("/empleados", { nombre, documento, cargo, activo: true });
+        const nuevoEmpleado = response.data;
+        if (horarioId) await api.put(`/empleados/${nuevoEmpleado.id}/horario/${horarioId}`);
+        toast.success("Empleado registrado", { description: "El empleado se guardó correctamente." });
+      }
+      setIsModalOpen(false);
       await cargarDatos();
-      toast.success("Empleado registrado", { description: "El empleado se guardó correctamente." });
     } catch (err) {
       console.error("Error al guardar empleado:", err);
-      toast.danger("Error al guardar", { description: "No se pudo registrar el empleado." });
-    }
-  };
-
-  const abrirEditar = (empleado) => {
-    setEditando(empleado);
-    setNombre(empleado.nombre || "");
-    setDocumento(empleado.documento || "");
-    setCargo(empleado.cargo || "");
-    setHorarioId(empleado.horario?.id ? String(empleado.horario.id) : "");
-    modalState.open();
-  };
-
-  const handleActualizar = async (e) => {
-    e.preventDefault();
-    try {
-      await api.put(`/empleados/${editando.id}`, { nombre, documento, cargo, activo: editando.activo });
-      if (horarioId) await api.put(`/empleados/${editando.id}/horario/${horarioId}`);
-      
-      cerrarModal();
-      await cargarDatos();
-      toast.success("Empleado actualizado", { description: "Los datos se guardaron correctamente." });
-    } catch (err) {
-      console.error("Error al actualizar empleado:", err);
-      toast.danger("Error al actualizar", { description: "No se pudo actualizar el empleado." });
+      toast.danger("Error", { description: "No se pudo guardar el empleado." });
     }
   };
 
@@ -133,9 +109,9 @@ export default function EmpleadosPage() {
           <h1 className="text-3xl font-bold text-white tracking-tight">Gestión de Empleados</h1>
           <p className="text-gray-400 mt-2 text-lg">Administra el personal registrado en el sistema</p>
         </div>
-        <Button className="bg-brand-blue hover:bg-blue-700 text-white font-semibold shadow-lg shadow-brand-blue/20" onPress={abrirNuevo}>
-          <span className="flex items-center gap-2"><Plus size={18} /><span>Nuevo Empleado</span></span>
-        </Button>
+        <button onClick={abrirNuevo} className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-brand-blue/20 transition-all">
+          <Plus size={18} /> Nuevo Empleado
+        </button>
       </div>
 
       <div className="glass-panel p-4 mb-6">
@@ -188,10 +164,10 @@ export default function EmpleadosPage() {
                   </td>
                   <td className="p-4">
                     <div className="flex gap-2">
-                      <Button size="sm" className="bg-white/5 hover:bg-white/20 text-white border border-white/10" onPress={() => abrirEditar(emp)}><span>Editar</span></Button>
-                      <Button size="sm" className={emp.activo ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20"} onPress={() => cambiarEstado(emp.id)}>
-                        <span>{emp.activo ? "Desactivar" : "Activar"}</span>
-                      </Button>
+                      <button onClick={() => abrirEditar(emp)} className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition-all text-sm">Editar</button>
+                      <button onClick={() => cambiarEstado(emp.id)} className={`px-3 py-1.5 rounded-lg border transition-all text-sm ${emp.activo ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20" : "bg-green-500/10 hover:bg-green-500/20 text-green-400 border-green-500/20"}`}>
+                        {emp.activo ? "Desactivar" : "Activar"}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -201,51 +177,46 @@ export default function EmpleadosPage() {
         </div>
       </div>
 
-      <Modal state={modalState}>
-        <Modal.Backdrop className="backdrop-blur-sm bg-black/60">
-          <Modal.Container placement="center">
-            <Modal.Dialog className="glass-panel bg-[#0B1120]/90 border border-white/10">
-              {({ close }) => (
-                <form onSubmit={editando ? handleActualizar : handleSubmit}>
-                  <Modal.Header><Modal.Heading className="text-white text-xl font-bold">{editando ? "Editar Empleado" : "Registrar Nuevo Empleado"}</Modal.Heading></Modal.Header>
-                  <Modal.Body className="flex flex-col gap-4 py-6">
-                    <TextField isRequired>
-                      <Label className="text-gray-300 font-medium mb-1">Nombre completo</Label>
-                      <Input placeholder="Ej. Juan Pérez" value={nombre} onChange={(e) => setNombre(e.target.value)} className="bg-white/5 border border-white/10 text-white placeholder-gray-500" />
-                    </TextField>
-                    <TextField isRequired>
-                      <Label className="text-gray-300 font-medium mb-1">Documento de identidad</Label>
-                      <Input placeholder="Ej. 1045123456" value={documento} onChange={(e) => setDocumento(e.target.value)} className="bg-white/5 border border-white/10 text-white placeholder-gray-500" />
-                    </TextField>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">Cargo <span className="text-red-400">*</span></label>
-                      <select required value={cargo} onChange={(e) => setCargo(e.target.value)} className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white">
-                        <option value="" disabled className="bg-[#0B1120]">Seleccionar cargo</option>
-                        <option value="Empleado" className="bg-[#0B1120]">Empleado</option>
-                        <option value="Administrador" className="bg-[#0B1120]">Administrador</option>
-                        <option value="Directivo" className="bg-[#0B1120]">Directivo</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-1">Horario</label>
-                      <select value={horarioId} onChange={(e) => setHorarioId(e.target.value)} className="w-full border border-white/10 rounded-xl px-4 py-3 bg-white/5 text-white">
-                        <option value="" className="bg-[#0B1120]">Seleccionar horario</option>
-                        {horarios.map((horario) => (
-                          <option key={horario.id} value={String(horario.id)} className="bg-[#0B1120]">{horario.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button type="button" className="bg-white/5 text-white hover:bg-white/10 border border-white/10" onPress={() => { close(); limpiarFormulario(); }}>Cancelar</Button>
-                    <Button type="submit" className="bg-brand-blue hover:bg-blue-700 text-white font-semibold">{editando ? "Guardar Cambios" : "Guardar Empleado"}</Button>
-                  </Modal.Footer>
-                </form>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="glass-panel bg-[#0B1120]/95 border border-white/10 w-full max-w-md relative z-10 p-6 rounded-2xl shadow-2xl">
+            <h2 className="text-xl font-bold text-white mb-4">{editando ? "Editar Empleado" : "Registrar Nuevo Empleado"}</h2>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nombre completo *</label>
+                <input required value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Juan Pérez" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Documento de identidad *</label>
+                <input required value={documento} onChange={(e) => setDocumento(e.target.value)} placeholder="Ej. 1045123456" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue/50" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Cargo *</label>
+                <select required value={cargo} onChange={(e) => setCargo(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50">
+                  <option value="" disabled className="bg-[#0B1120]">Seleccionar cargo</option>
+                  <option value="Empleado" className="bg-[#0B1120]">Empleado</option>
+                  <option value="Administrador" className="bg-[#0B1120]">Administrador</option>
+                  <option value="Directivo" className="bg-[#0B1120]">Directivo</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Horario</label>
+                <select value={horarioId} onChange={(e) => setHorarioId(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50">
+                  <option value="" className="bg-[#0B1120]">Seleccionar horario</option>
+                  {horarios.map((horario) => (
+                    <option key={horario.id} value={String(horario.id)} className="bg-[#0B1120]">{horario.nombre}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 transition-all text-sm font-medium">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-medium shadow-lg shadow-brand-blue/20 transition-all text-sm">{editando ? "Guardar Cambios" : "Guardar Empleado"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
