@@ -9,18 +9,19 @@ export default function MarcacionesPage() {
   const [tarjetas, setTarjetas] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  // Estados para el modal de marcación manual
+  // Estados para el modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [empleadoId, setEmpleadoId] = useState("");
+  const [tipo, setTipo] = useState("ENTRADA");
+  const [fechaHora, setFechaHora] = useState("");
   const [guardando, setGuardando] = useState(false);
 
   const cargarDatos = async () => {
     try {
-      // Hacemos las peticiones al mismo tiempo, usando /cards según tu backend
       const [resMarcaciones, resEmpleados, resTarjetas] = await Promise.all([
         api.get("/marcaciones"),
         api.get("/empleados"),
-        api.get("/cards").catch(() => ({ data: [] })) // Evita romper si falla
+        api.get("/cards").catch(() => ({ data: [] }))
       ]);
       setMarcaciones(resMarcaciones.data);
       setEmpleados(resEmpleados.data);
@@ -53,6 +54,15 @@ export default function MarcacionesPage() {
     toast.default("Sincronizando", { description: "Consultando los datos más recientes..." });
   };
 
+  // Abrir modal con la fecha/hora actual por defecto
+  const abrirModal = () => {
+    const ahora = new Date();
+    // Ajuste para que el input datetime-local muestre la hora correcta
+    ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+    setFechaHora(ahora.toISOString().slice(0, 16)); 
+    setIsModalOpen(true);
+  };
+
   const handleMarcacionManual = async (e) => {
     e.preventDefault();
     if (!empleadoId) {
@@ -63,9 +73,7 @@ export default function MarcacionesPage() {
     try {
       setGuardando(true);
       
-      // 1. Buscar la tarjeta que pertenezca al empleado seleccionado
       const tarjetaDelEmpleado = tarjetas.find(t => {
-          // Validamos si el backend envía el objeto empleado completo o solo el ID
           const idDelEmpleadoEnTarjeta = t.empleado?.id || t.empleadoId; 
           return idDelEmpleadoEnTarjeta === Number(empleadoId);
       });
@@ -76,12 +84,16 @@ export default function MarcacionesPage() {
         return;
       }
 
-      // 2. Enviamos el UID de la tarjeta al endpoint de tu compañero
+      // Convertimos la fecha local del input a formato ISO
+      const fechaIso = new Date(fechaHora).toISOString();
+
       await api.post("/marcaciones", {
-        uid: tarjetaDelEmpleado.uid 
+        uid: tarjetaDelEmpleado.uid,
+        tipo: tipo,
+        fechaHora: fechaIso
       });
 
-      toast.success("Marcación guardada", { description: "La asistencia se registró correctamente." });
+      toast.success("Marcación guardada", { description: `Se registró ${tipo} correctamente.` });
       setIsModalOpen(false);
       setEmpleadoId("");
       await cargarDatos(); 
@@ -107,7 +119,7 @@ export default function MarcacionesPage() {
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Sincronizar
           </button>
           
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-brand-blue/20 transition-all">
+          <button onClick={abrirModal} className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-brand-blue/20 transition-all">
             <PlusCircle size={18} /> Marcación Manual
           </button>
         </div>
@@ -183,6 +195,25 @@ export default function MarcacionesPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Tipo de Marcación *</label>
+                <select required value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50">
+                  <option value="ENTRADA" className="bg-[#0B1120]">ENTRADA</option>
+                  <option value="SALIDA" className="bg-[#0B1120]">SALIDA</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Fecha y Hora *</label>
+                <input 
+                  type="datetime-local" 
+                  required 
+                  value={fechaHora} 
+                  onChange={(e) => setFechaHora(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50 [color-scheme:dark]"
+                />
               </div>
 
               <div className="flex justify-end gap-3 mt-4">
