@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { toast } from "@heroui/react";
-import { RefreshCw, Loader2, PlusCircle, Trash2 } from "lucide-react";
+import { RefreshCw, Loader2, PlusCircle, Trash2, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 
 export default function MarcacionesPage() {
   const [marcaciones, setMarcaciones] = useState([]);
@@ -16,6 +17,10 @@ export default function MarcacionesPage() {
   const [fechaHora, setFechaHora] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [limpiando, setLimpiando] = useState(false);
+
+  // Estados para el filtro de fechas de exportación
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
 
   const cargarDatos = async () => {
     try {
@@ -45,7 +50,6 @@ export default function MarcacionesPage() {
   const diaHoy = hoy.toLocaleDateString("es-CO", { weekday: "long" });
   const fechaHoy = hoy.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
 
-  // Mostramos TODAS las marcaciones, ordenadas de la más reciente a la más antigua
   const todasLasMarcaciones = [...marcaciones].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
   const handleSincronizar = () => {
@@ -101,7 +105,6 @@ export default function MarcacionesPage() {
     }
   };
 
-  // Función para limpiar SOLO las marcaciones
   const handleLimpiar = async () => {
     const mensaje = "¿Estás SEGURO de borrar todo el historial de marcaciones? Esta acción no se puede deshacer.";
     if (!window.confirm(mensaje)) return;
@@ -117,6 +120,44 @@ export default function MarcacionesPage() {
     } finally {
       setLimpiando(false);
     }
+  };
+
+  // --- FUNCIÓN PARA EXPORTAR A EXCEL ---
+  const handleExportar = () => {
+    let datosParaExportar = todasLasMarcaciones;
+
+    if (fechaInicio || fechaFin) {
+      datosParaExportar = todasLasMarcaciones.filter(m => {
+        const fechaM = new Date(m.fechaHora).getTime();
+        const inicio = fechaInicio ? new Date(fechaInicio + "T00:00:00").getTime() : 0;
+        const fin = fechaFin ? new Date(fechaFin + "T23:59:59").getTime() : Infinity;
+        return fechaM >= inicio && fechaM <= fin;
+      });
+    }
+
+    if (datosParaExportar.length === 0) {
+      toast.warning("Sin datos", { description: "No hay marcaciones en ese rango de fechas." });
+      return;
+    }
+
+    const datosExcel = datosParaExportar.map(m => {
+      const fecha = new Date(m.fechaHora);
+      return {
+        "Empleado": m.empleado?.nombre || "Sin empleado",
+        "Documento": m.empleado?.documento || "-",
+        "Fecha": fecha.toLocaleDateString("es-CO"),
+        "Hora": fecha.toLocaleTimeString("es-CO"),
+        "Tipo": m.tipo,
+        "Estado": m.minutosRetraso > 0 ? `${m.minutosRetraso} min tarde` : "A tiempo"
+      };
+    });
+
+    const hoja = XLSX.utils.json_to_sheet(datosExcel);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Marcaciones");
+    
+    XLSX.writeFile(libro, `Marcaciones_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast.success("Excel generado", { description: "El archivo se ha descargado." });
   };
 
   return (
@@ -146,6 +187,21 @@ export default function MarcacionesPage() {
             <PlusCircle size={18} /> Marcación Manual
           </button>
         </div>
+      </div>
+
+      {/* BARRA DE FILTROS Y EXPORTACIÓN */}
+      <div className="glass-panel p-4 mb-6 flex flex-col md:flex-row items-end gap-4">
+        <div className="flex flex-col w-full md:w-auto">
+          <label className="text-sm text-gray-400 mb-1">Desde</label>
+          <input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-brand-blue/50 [color-scheme:dark]" />
+        </div>
+        <div className="flex flex-col w-full md:w-auto">
+          <label className="text-sm text-gray-400 mb-1">Hasta</label>
+          <input type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-brand-blue/50 [color-scheme:dark]" />
+        </div>
+        <button onClick={handleExportar} className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg shadow-green-600/20 transition-all w-full md:w-auto justify-center">
+          <Download size={18} /> Exportar a Excel
+        </button>
       </div>
 
       <div className="glass-panel overflow-hidden">
