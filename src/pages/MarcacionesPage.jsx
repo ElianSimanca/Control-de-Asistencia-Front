@@ -1,27 +1,30 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { Chip, toast } from "@heroui/react";
+import { toast } from "@heroui/react";
 import { RefreshCw, Loader2, PlusCircle } from "lucide-react";
 
 export default function MarcacionesPage() {
   const [marcaciones, setMarcaciones] = useState([]);
   const [empleados, setEmpleados] = useState([]);
+  const [tarjetas, setTarjetas] = useState([]); // <-- NUEVO ESTADO
   const [loading, setLoading] = useState(true);
 
   // Estados para el modal de marcación manual
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [empleadoId, setEmpleadoId] = useState("");
-  const [tipo, setTipo] = useState("ENTRADA");
   const [guardando, setGuardando] = useState(false);
 
   const cargarDatos = async () => {
     try {
-      const [resMarcaciones, resEmpleados] = await Promise.all([
+      // Hacemos las 3 peticiones al mismo tiempo
+      const [resMarcaciones, resEmpleados, resTarjetas] = await Promise.all([
         api.get("/marcaciones"),
-        api.get("/empleados")
+        api.get("/empleados"),
+        api.get("/tarjetas").catch(() => ({ data: [] })) // Si falla, devuelve array vacío para no romper
       ]);
       setMarcaciones(resMarcaciones.data);
       setEmpleados(resEmpleados.data);
+      setTarjetas(resTarjetas.data);
     } catch (err) {
       console.error("Error al obtener datos:", err);
       toast.danger("Error de conexión", { description: "No se pudieron cargar los datos." });
@@ -61,23 +64,32 @@ export default function MarcacionesPage() {
     try {
       setGuardando(true);
       
-      // Aquí enviamos la marcación al backend. 
-      // Asumimos que tu backend tiene un endpoint POST /marcaciones para crear una manual.
-      // Si tu backend usa otro endpoint, cámbialo aquí:
+      // 1. Buscar la tarjeta que pertenezca a este empleado
+      // Nota: Revisa si en la entidad Tarjeta la propiedad se llama 'empleado' o 'empleadoId'
+      const tarjetaDelEmpleado = tarjetas.find(t => {
+          // A veces el backend devuelve el objeto empleado completo, a veces solo el ID
+          const idTarjeta = t.empleado?.id || t.empleadoId; 
+          return idTarjeta === Number(empleadoId);
+      });
+
+      if (!tarjetaDelEmpleado) {
+        toast.danger("Error", { description: "Este empleado no tiene una tarjeta asignada en el sistema." });
+        setGuardando(false);
+        return;
+      }
+
+      // 2. Enviamos el UID al endpoint de tu compañero
       await api.post("/marcaciones", {
-        empleadoId: Number(empleadoId),
-        tipo: tipo,
-        fechaHora: new Date().toISOString() // Envía la hora actual
+        uid: tarjetaDelEmpleado.uid 
       });
 
       toast.success("Marcación guardada", { description: "La asistencia se registró correctamente." });
       setIsModalOpen(false);
       setEmpleadoId("");
-      setTipo("ENTRADA");
-      await cargarDatos(); // Recargamos la tabla
+      await cargarDatos(); 
     } catch (err) {
       console.error("Error al guardar marcación manual:", err);
-      toast.danger("Error", { description: "No se pudo registrar la marcación. Verifica el endpoint del backend." });
+      toast.danger("Error", { description: err.response?.data?.message || "No se pudo registrar la marcación." });
     } finally {
       setGuardando(false);
     }
@@ -97,7 +109,6 @@ export default function MarcacionesPage() {
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} /> Sincronizar
           </button>
           
-          {/* BOTÓN PARA ABRIR EL MODAL MANUAL */}
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-brand-blue/20 transition-all">
             <PlusCircle size={18} /> Marcación Manual
           </button>
@@ -139,9 +150,9 @@ export default function MarcacionesPage() {
                     <td className="p-4 text-gray-400 font-mono">{m.empleado?.documento || "-"}</td>
                     <td className="p-4 text-gray-300 font-mono">{fecha.toLocaleTimeString("es-CO")}</td>
                     <td className="p-4">
-                      <Chip size="sm" variant="flat" className={m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}>
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${m.tipo === "ENTRADA" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-orange-500/10 text-orange-400 border border-orange-500/20"}`}>
                         {m.tipo}
-                      </Chip>
+                      </span>
                     </td>
                     <td className="p-4">
                       {m.minutosRetraso > 0 ? <span className="text-sm font-medium text-red-400">{m.minutosRetraso} min tarde</span> : <span className="text-sm font-medium text-green-400">A tiempo</span>}
@@ -173,14 +184,6 @@ export default function MarcacionesPage() {
                       {emp.nombre} - {emp.documento}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Tipo de Marcación *</label>
-                <select required value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue/50">
-                  <option value="ENTRADA" className="bg-[#0B1120]">ENTRADA</option>
-                  <option value="SALIDA" className="bg-[#0B1120]">SALIDA</option>
                 </select>
               </div>
 
