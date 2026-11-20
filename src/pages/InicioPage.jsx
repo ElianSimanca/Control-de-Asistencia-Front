@@ -8,9 +8,6 @@ export default function InicioPage() {
   const [empleados, setEmpleados] = useState([]);
   const [marcaciones, setMarcaciones] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Estado para el indicador de conexión real
-  const [isBackendOnline, setIsBackendOnline] = useState(false);
 
   // Filtros de fecha para exportar
   const [fechaInicio, setFechaInicio] = useState("");
@@ -31,27 +28,10 @@ export default function InicioPage() {
     }
   };
 
-  // Función para verificar si el backend está despierto
-  const verificarConexion = async () => {
-    try {
-      await api.get("/health");
-      setIsBackendOnline(true);
-    } catch (err) {
-      setIsBackendOnline(false);
-    }
-  };
-
   useEffect(() => {
     cargarDatos();
-    verificarConexion(); // Verificamos al cargar
-
     const intervaloDatos = setInterval(cargarDatos, 3000);
-    const intervaloPing = setInterval(verificarConexion, 10000); // Verifica cada 10 segundos
-
-    return () => {
-      clearInterval(intervaloDatos);
-      clearInterval(intervaloPing);
-    };
+    return () => clearInterval(intervaloDatos);
   }, []);
 
   const hoy = new Date();
@@ -123,13 +103,9 @@ export default function InicioPage() {
           <div>
             <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
             <p className="text-gray-400 mt-1 text-lg">Resumen del control de asistencia</p>
-            
-            {/* INDICADOR DE CONEXIÓN REAL */}
-            <div className={`glass-panel px-4 py-2 mt-4 inline-flex items-center gap-2 border ${isBackendOnline ? 'border-brand-green/20' : 'border-red-500/20'}`}>
-              <div className={`w-2 h-2 rounded-full ${isBackendOnline ? 'bg-brand-green animate-pulse' : 'bg-red-500'}`}></div>
-              <p className="text-sm font-medium text-gray-300 capitalize">
-                {isBackendOnline ? 'Sistema en línea' : 'Sistema fuera de línea'}
-              </p>
+            <div className="glass-panel px-4 py-2 mt-4 inline-flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></div>
+              <p className="text-sm font-medium text-gray-300 capitalize">{diaHoy}, <span className="text-white">{fechaHoy}</span></p>
             </div>
           </div>
           
